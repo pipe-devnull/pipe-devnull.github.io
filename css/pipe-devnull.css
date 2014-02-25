@@ -1,0 +1,35 @@
+
+.footer {border-top: 1px solid #ddd;}
+
+.entry {margin-bottom: 4px; padding-bottom: 2px;}
+
+.title {color:white;font-size:150%;}
+.subtitle {color:gray;}
+
+.posttitleside {font-size: 60%;font-style: italic;}
+/** Syntax Highlighting CSS **/
+
+.codehilite {
+    background-color: #272822;
+    }
+
+.codehilite pre {
+    background-color: #272822;
+}
+
+.linenos {display:none;}
+.m {color: white}
+/** End of Syntax Highlighting CSS **/
+
+/** Closing img for modals **/
+#simplemodal-container a.modalCloseImg {
+	background:url(/static/img/x.png) no-repeat; /* adjust url as required */
+	width:25px;
+	height:29px;
+	display:inline;
+	z-index:3200;
+	position:absolute;
+	top:-15px;
+	right:-18px;
+	cursor:pointer;
+}

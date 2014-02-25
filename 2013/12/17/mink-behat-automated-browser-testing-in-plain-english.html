@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<!--[if lt IE 7]>      <html class="no-js lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
+<!--[if IE 7]>         <html class="no-js lt-ie9 lt-ie8"> <![endif]-->
+<!--[if IE 8]>         <html class="no-js lt-ie9"> <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js"> <!--<![endif]-->
+<head>
+    <meta charset="utf-8">
+    <title>pipe /dev/null - Automated Browser Acceptance Testing with Behat & Mink</title>
+    <meta name="author" content="Adrian Bruce - pipe-devnull.com">
+    <meta name="description" content="How to use Behat & Mink to create automated browser based acceptance test suites.  By combining the concepts and tooling from Behavior Driven Development (BDD) with remote browser driver technologies, we will build up a description of the desired behaviors of a system and then transform those descriptions into real web browser test simulations.">
+    <meta name="keywords" content="Behat, Mink, Behat & Mink, Behat and Mink, BDD, automated browser tests, mink behat example, mink behat demo, mink behat functional testing, PHP functional tests,PHP BDD Browser tests, PHP acceptance testing, Gherkin, Mink Extension, PHP acceptance tests and continuous integration, Gherkin PHP acceptance testing, browser automation, Gherkin browser automation, phantomJS and Mink, phantomJS Behat Mink">
+
+    <meta name="viewport" content="width=device-width">
+
+    <!-- Bootstrap styles -->
+    <link rel="stylesheet" href="/css/vendor/bootstrap/bootstrap.css">
+    <link rel="stylesheet" href="/css/vendor/bootstrap/bootstrap-theme.css">
+    <link rel="stylesheet" href="/css/syntax.css">
+    <link rel="stylesheet" href="/css/pipe-devnull.css">
+
+
+    <!-- Font-Awesome -->
+    <link rel="stylesheet" href="/css/vendor/font-awesome/font-awesome.css">
+
+    <!-- Google Webfonts -->
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans:400,600|PT+Serif:400,400italic' rel='stylesheet' type='text/css'>
+
+    <!-- Styles -->
+    <link rel="stylesheet" href="/css/styles-bluegreen.css" id="theme-styles">
+
+    <!--[if lt IE 9]>
+        <link rel="stylesheet" href="css/ie8.css">        
+        <script src="js/vendor/google/html5-3.6-respond-1.1.0.min.js"></script>
+    <![endif]-->
+
+    <!-- Le fav and touch icons -->
+    <link rel="shortcut icon" href="/img/ico/favicon.ico">
+
+</head>
+
+
+<body>
+    <header>
+        <div class="widewrapper masthead">
+            <div class="container">
+                <a href="/index.html" class='logo'>
+                   <img src='/img/pipedevnull.png' alt='pipe-devnull'/>
+                </a>
+                <br/>
+                <span class='subtitle'>Blog: PHP, Python, Linux, Web services &amp; Continuous delivery</span>
+
+                <div id="mobile-nav-toggle" class="pull-right">
+                    <a href="#" data-toggle="collapse" data-target=".tales-nav .navbar-collapse">
+                        <i class="icon-reorder"></i>
+                    </a>
+                </div>
+
+                <nav class="pull-right tales-nav">
+                    <div class="collapse navbar-collapse">
+                        <ul class="nav nav-pills navbar-nav">
+                            <li>
+                                <a href="/">Blog</a>
+                            </li>
+                            <li>
+                                <a href="/about.html">About</a>
+                            </li>
+                            <li>
+                                <a href="/post-index.html">All Posts</a>
+                            </li>                        
+                        </ul>
+                    </div>
+                </nav>        
+
+            </div>
+        </div>
+
+        <!-- <div class="widewrapper subheader">
+            <div class="container">
+
+                <div class="tales-breadcrumb">
+                    <a href="#">Blog: PHP, Python, Linux, Web services &amp; Continuous delivery</a>
+                </div> 
+
+                <div class="tales-searchbox">
+                    <form action="#" method="get" accept-charset="utf-8">
+                        <button class="searchbutton" type="submit">
+                            <i class="icon-search"></i>
+                        </button>
+                        <input class="searchfield" id="searchbox" type="text" placeholder="Search">
+                    </form>
+                </div>
+            </div>
+        </div> -->
+    </header>
+
+    <div class="widewrapper main">
+        <div class="container">
+            <div class="row">
+                
+                <div class="col-md-8 blog-main">
+                    <section id="Entry">
+
+  <h1>Automated Browser Acceptance Testing with Behat & Mink</h1>
+  
+  <p>This post accompanies a project I&#39;ve put on Github that provides an example of how to use Behat &amp; Mink to create automated browser based acceptance tests.  By combining the concepts and tooling from Behavior Driven Development (BDD) with remote browser driver technologies, we will describe the desired behavior of a system and then transform these descriptions into test simulations running in real web browsers. The intention of both the demo project and the post is to highlight that:</p>
+
+<ul>
+<li>Driving your acceptance testing process with BDD techniques is a valuable concept</li>
+<li>Behat and Mink are a solid choice for implementing acceptance tests</li>
+</ul>
+
+<p>The demo project consists of a web site that sells ascii art (The Ascii Art Marketplace) and a test suite that covers the features &#39;add to basket&#39; and &#39;newsletter sign up&#39;. It also contains a wrapper script that will run the tests in either phantomJS or Selenium, this can be useful when hooking things up with Continuous Integration (CI). For more info on using phantomJS with Mink &amp; Behat see <strong><a href="phantomjs-mink-behat">this section</a></strong> a bit further down.</p>
+
+<p>In this post, I&#39;m mainly providing some background and ramblings around BDD, why automating acceptance testing is so valuable and general information on Behat &amp; Mink.  If your already familiar with this stuff then you might want to skip straight to the github repo at <strong><a href='https://github.com/pipe-devnull/mink-behat-acceptance-test-demo'>https://github.com/pipe-devnull/mink-behat-acceptance-test-demo</a></strong>  </p>
+
+<!-- more -->
+
+<h2>A Little Background</h2>
+
+<p>The core idea of BDD is centered around the use of an ubiquitous language called <em>Gherkin</em> that is designed to express what the desired behavior of a system should be using simple, non-technical language.  Gherkin enforces a uniform structure to the definition of behavior that makes it easy for a human to read and understand but also easy for a program to parse.  Behavior definitions are organized by a system&#39;s <em>features</em>, within each feature behavior is further grouped into <em>scenarios</em>. Each line of a scenario begins with one of the verbs GIVEN, WHEN, THEN, AND and BUT.  The easiest way to understand this is by looking at an example, the following snippet of Gherkin describes the expected behavior of a VIP discount rule on an e-commerce store</p>
+<div class="highlight"><pre><code class="text language-text" data-lang="text">    SCENARIO: Allow VIP discounts
+      GIVEN I am a VIP customer
+      AND I add a discountable product to the shopping cart
+      AND I add a non-discountable product to the shopping cart
+      WHEN I view the shopping cart 
+      THEN I should see a 50% discount on the discountable product
+      BUT  the non-discountable product should have no discount
+</code></pre></div>
+<p>Gherkin has a bit more to offer than just whats in the simple example above (e.g. Scenario backgrounds &amp; Scenario outlines) but it is a typical example of how Gherkin is used to express desired behavior.  For more in-depth information on BDD and Domain Specific Languages (DSLs) such as Gherkin check out the <a href="http://dannorth.net/introducing-bdd/">original BDD article from Dan North</a> and <a href="http://martinfowler.com/bliki/DomainSpecificLanguage.html">Martin Fowlers overview on DSLs</a></p>
+
+<p>An interesting aspect to Gherkin is that you have a lot of freedom to decide how you abstract the definitions of behavior.  You can keep things vague and let the code layer take care of all the low level detail or you can be more specific in the Gherkin, writing more granular descriptions of the desired behavior.</p>
+
+<h3>Beyond BDD</h3>
+
+<p>BDD is an excellent development methodology but I have found opportunities to use it can be rare in large organizations, especially when your core role is largely supporting / enhancing legacy applications in non-tech driven companies. BDD focuses on driving the code development process using up front specifications of desired behavior but I&#39;m instead looking more at how we can use BDD techniques more as a stand alone testing tool and forget the development aspect (at least for now).</p>
+
+<p>There is a huge amount of value in <em>driving your acceptance testing process with BDD techniques</em></p>
+
+<ul>
+<li>Gherkin can be understood by both technical and non-technical personnel making it much easier to share understanding of a system&#39;s capabilities between developers, testers and business stakeholders.</li>
+<li>Stakeholders / Testers / Developers / any others can start writing test cases with minimal effort.</li>
+<li>You can start to build a common approach to writing tests that transcends what platform a system is running on or what programming language it is written in. </li>
+<li>A consistent and structured approach of authoring naturally leads into automation.</li>
+<li>Your tests naturally become a reliable source of living documentation yet remain accessible and readable.</li>
+<li>Future maintainers can quickly acquire detailed knowledge of the system they inherit.</li>
+</ul>
+
+<p>If you need to document a legacy system why not describe that&#39;s system&#39;s behavior using Gherkin? Then turn that documentation into real tests that you can re-run on every change to catch regressions.  The same reasoning can be used when working with a black box systems that you don&#39;t have source code for, or when looking to introduce acceptance tests for a new system.</p>
+
+<h2>Behat, Mink and the Mink extension</h2>
+
+<p>Before getting into the example project, lets have a quick overview of the tools we are using:</p>
+
+<p><strong>Behat</strong> - A BDD framework written in PHP</p>
+
+<p><strong>Mink</strong> - A web browser driver abstraction layer written in PHP that includes integrations with <strong>Goutte</strong>, <strong>Selenium</strong>, <strong>Selenium 2</strong>, <strong>sahi</strong> and <strong>Zombie JS</strong> out the box.  </p>
+
+<p><strong>Mink Extension</strong> - An extension for Behat that enables the use pf the Mink browser abstraction layer within Behat</p>
+
+<p>So, Behat provides us a the ability to turn Gherkin into code, Mink enables us to use code to drive a web browser and the Mink Extension glues Mink and Behat together.  I&#39;ve tried several solutions like this in Ruby, Python and JavaScript and while they are all similar, I can honestly say that the PHP solution is one of the best I tried.  It stacks up really well in terms of usability, extendability and scalability against the likes of Lettuce_webdriver (Python), Waitr (Ruby) and ZombieJs &amp; Jasmine (Javascript).  </p>
+
+<p>Behat &amp; Mink are also the natural choice if your strongest skill set is in PHP, there are some examples of BDD frameworks for other languages at the <a href="#BDDframeworks">foot of this post</a>.</p>
+
+<h3>Browser Drivers</h3>
+
+<p>Mink supports two types of browser driver: <strong>headless web browser drivers</strong> and <strong>standard web browser drivers</strong>.  A headless web browser driver is simply a browser emulator that can perform all the actions of a normal web browser but does not need to launch an actual browser to perform the emulation.  Headless drivers require no UI to be installed on the host upon which they run and as such are ideal for Continuous Integration (CI) environments.  </p>
+
+<p>Different drivers have different capabilities and the one you choose will depend on what you need to test.  A lot of the Behat &amp; Mink examples I have come across focus on using <strong>Goutte</strong> (a headless driver written in PHP) as the main driver. Goutte is fast and suits simple test cases but its not an option as soon as you encounter a complex form or JavaScript, in most cases the tests I write require more than Goutte has to offer. After a fair amount of experimentation I have found the most effective solution is to use:</p>
+
+<ul>
+<li>Selenium 2 with Firefox for running tests locally and watching whilst they run</li>
+<li>PhantomJS for running tests as part of CI</li>
+</ul>
+
+<p><br/></p>
+
+<p><a name='phantomjs-mink-behat'></a></p>
+
+<h4>Using PhantomJS with Behat+Mink</h4>
+
+<p>PhantomJS is not officially included as a driver with Mink but is pretty easy to setup.  PhantomJS provides the option to start up in remote webdriver server mode where by it will start a server process that listens on a local port number (which is configurable) and wait for instructions to be sent to it. Clients such as Mink, that implement the webdriver API, connect to the remote web driver server and send it browser actions to emulate.  The server then sends responses back to the client so the client can then perform assertions on the simulation.</p>
+
+<p>This works perfectly with Mink ... </p>
+
+<p>1 Start phantomJs in remote server mode</p>
+
+<pre>
+    phantomjs --webdriver=8643 
+</pre>
+
+<p>2 Change your behat.yml config file to use selemium2 (webdriver) and provide the location for the webdriver service.</p>
+
+<pre>
+    default:
+      extensions:
+        Behat\MinkExtension\Extension:
+          default_session:                selenium2
+          selenium2:
+            wd_host:                      "http://localhost:8643/wd/hub"
+</pre>
+
+<p>3 Run your tests.</p>
+
+<pre>
+    bin/behat
+</pre>
+
+<p><strong>NOTE: Why not use zombieJS? Mainly because it requires nodeJS to run and I don&#39;t want to install node everywhere right now.  PhantomJS is a standalone application with no dependencies.  I also had issues getting zombieJS up and running where as PhantomJS has always worked out the box where ever i have put it.</strong></p>
+
+<p><br/></p>
+
+<h2>Try the sample project</h2>
+
+<p>Thats the brief intro over, give the demo project a try and the perhaps use it as a base for building your own acceptance test suites.</p>
+
+<p><strong><a href='https://github.com/pipe-devnull/mink-behat-acceptance-test-demo'>https://github.com/pipe-devnull/mink-behat-acceptance-test-demo</a></strong></p>
+
+<p><br/></p>
+
+<hr>
+
+<hr>
+
+<h5>BDD Frameworks &amp; Browser driver layers in other languages</h5>
+
+<p><a name="BDDframeworks"></a></p>
+
+<table class='table table-striped'>
+  <thead>
+    <tr><th>Language</th><th>Framework</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>Ruby</td><td>Cucumber</td></tr>
+    <tr><td>Python</td><td>Lettuce</td></tr>
+    <tr><td>C# (.NET)</td><td>SpecFlow</td></tr>
+    <tr><tr><td>Java</td><td>JBehave</td></tr>
+    <tr><td>JavaScript</td><td>Jasmine</td></tr>
+  </tbody>
+</table>
+
+
+  <div id="disqus_thread"></div>
+<script type="text/javascript">
+
+    var disqus_shortname = 'pipe-devnull';
+    // Put in developer mode
+    //var disqus_developer = 1; // developer mode is on
+    // blog post title
+    //var disqus_identifier = '/article/name'
+   
+
+    /* * * DON'T EDIT BELOW THIS LINE * * */
+    (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = 'http://' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+
+<a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+
+</section>
+                </div>
+                
+                <aside class="col-md-4 blog-aside">
+   <div class="aside-widget clearfix">
+      <header>
+          <h3>Contact</h3>
+      </header>
+      <div class="body">
+        <a href="https://twitter.com/pipedevnull" class="twitter-follow-button" data-show-count="false" data-size="large">Follow @pipedevnull</a>
+        <script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+'://platform.twitter.com/widgets.js';fjs.parentNode.insertBefore(js,fjs);}}(document, 'script', 'twitter-wjs');</script>
+        <br/>
+        <p><a href="mailto:ade@pipe-devnull.com">ade@pipe-devnull.com</a></p>
+        <br/>
+      </div>
+  </div>
+   <div class="aside-widget  clearfix">
+      <header>
+          <h3>Github</h3>
+      </header>
+      <div class="body">
+        <a href='https://github.com/pipe-devnull'>github.com/pipe-devnull</a>
+        
+	<hr/>
+	<p class='lead'><a href="https://github.com/pipe-devnull/mink-behat-acceptance-test-demo">mink-behat-acceptance-test-demo</a></p>
+	<p class='small'>Example of using Behat, MInk & Mink Extension to build an acceptance (functional) test suite. (Forks: 0)</p>
+
+
+	<hr/>
+	<p class='lead'><a href="https://github.com/pipe-devnull/vagrant-dev-lamp">vagrant-dev-lamp</a></p>
+	<p class='small'>Base LAMP (PHP) stack with vagrant that includes remote debugging, profiling with xhprof and other common PHP QA tools. (Forks: 13)</p>
+
+
+	<hr/>
+	<p class='lead'><a href="https://github.com/pipe-devnull/ZF2Helper">ZF2Helper</a></p>
+	<p class='small'>Zend Framework 2 helper for Sublime Text 2 that helps automate the creation of new modules, controllers and actions. (Forks: 8)</p>
+
+
+      </div>
+  </div>
+   <div class="aside-widget">
+      <header>
+          <h3>Tags</h3>
+      </header>
+      <div class="body clearfix">
+          	<ul class='tags'>
+	
+		<li>
+			<a id="subversion" href="/tags/subversion.html">subversion</a>
+		</li>
+	
+		<li>
+			<a id="PHP" href="/tags/PHP.html">PHP</a>
+		</li>
+	
+		<li>
+			<a id="PHPUnit" href="/tags/PHPUnit.html">PHPUnit</a>
+		</li>
+	
+		<li>
+			<a id="ZendFramework" href="/tags/ZendFramework.html">ZendFramework</a>
+		</li>
+	
+		<li>
+			<a id="editors" href="/tags/editors.html">editors</a>
+		</li>
+	
+		<li>
+			<a id="SublimeText" href="/tags/SublimeText.html">SublimeText</a>
+		</li>
+	
+		<li>
+			<a id="Python" href="/tags/Python.html">Python</a>
+		</li>
+	
+		<li>
+			<a id="HTTP" href="/tags/HTTP.html">HTTP</a>
+		</li>
+	
+		<li>
+			<a id="git" href="/tags/git.html">git</a>
+		</li>
+	
+		<li>
+			<a id="Vagrant" href="/tags/Vagrant.html">Vagrant</a>
+		</li>
+	
+		<li>
+			<a id="Virtualbox" href="/tags/Virtualbox.html">Virtualbox</a>
+		</li>
+	
+		<li>
+			<a id="Puppet" href="/tags/Puppet.html">Puppet</a>
+		</li>
+	
+		<li>
+			<a id="BDD" href="/tags/BDD.html">BDD</a>
+		</li>
+	
+		<li>
+			<a id="Testing" href="/tags/Testing.html">Testing</a>
+		</li>
+	
+	</ul>
+
+      </div>
+  </div>
+</aside>
+            </div>
+        </div>
+    </div>
+
+        <footer>
+        <div class="widewrapper footer">
+            <div class="container">
+                <div class="row">
+                    <div class="col-md-4 footer-widget">
+                       <!--  <h3> <i class="icon-cog"></i>Statistics</h3>
+
+                        <span>Even we sometimes loose track of how many articles we actually have here.  This one helps:</span>
+
+                        <div class="stats">
+                            <div class="line">
+                                <span class="counter">27</span>
+                                <span class="caption">Articles</span>
+                            </div>
+                            <div class="line">
+                                <span class="counter">208</span>
+                                <span class="caption">Comments</span>
+                            </div>
+                            <div class="line">
+                                <span class="counter">2</span>
+                                <span class="caption">Authors</span>
+                            </div>                    
+                        </div> -->
+                    </div>
+
+                    <div class="col-md-4 footer-widget">
+                        <!-- <h3> <i class="icon-star"></i>Hall of Fame</h3>
+                        <ul class="tales-list">
+                            <li><a href="index.html">Why we Need to Encrypt All Communication</a></li>
+                            <li><a href="#">Selling is a Function of Design. Not Vice-Versa.</a></li>
+                            <li><a href="#">It’s Hard To Come Up With Dummy Titles</a></li>
+                            <li><a href="#">Why the Internet is Full of Cats</a></li>
+                            <li><a href="#">Last Made-Up Headline, I Swear!</a></li>
+                        </ul> -->
+                    </div>
+
+                    <div class="col-md-4 footer-widget">
+                        <h3> <i class="icon-cog"></i>Contact Me</h3>
+                        <span class="email">
+                            <a href="#">ade@pipe-devnull.com</a>,
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="widewrapper copyright">
+            <div class="container">
+                pipe-devnull.com &copy;  2013
+            </div>
+        </div>
+    </footer>
+
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+    <script>window.jQuery || document.write('<script src="/js/vendor/jquery/jquery-1.9.1.min.js"><\/script>')</script>    
+    <script src="/js/vendor/bootstrap/bootstrap.min.js"></script>
+    <script src="/js/vendor/modernizr/modernizr.js"></script>
+    <script src="/js/vendor/jquery.simplemodal.1.4.4.min.js"></script>
+    <script src="/js/null.js"></script>
+    <script type="text/javascript">
+
+      var _gaq = _gaq || [];
+      _gaq.push(['_setAccount', 'UA-34003533-1']);
+      _gaq.push(['_trackPageview']);
+
+      (function() {
+        var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+        ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+        var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+      })();
+
+    </script>
+
+</html>

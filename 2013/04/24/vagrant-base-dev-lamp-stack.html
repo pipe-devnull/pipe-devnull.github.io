@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<!--[if lt IE 7]>      <html class="no-js lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
+<!--[if IE 7]>         <html class="no-js lt-ie9 lt-ie8"> <![endif]-->
+<!--[if IE 8]>         <html class="no-js lt-ie9"> <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js"> <!--<![endif]-->
+<head>
+    <meta charset="utf-8">
+    <title>pipe /dev/null - Rapidly Building  LAMP Development Environments with Vagrant</title>
+    <meta name="author" content="Adrian Bruce - pipe-devnull.com">
+    <meta name="description" content="Rapidly Build LAMP development environments with vagrant. A vagrant template for creating LAMP development environments easily and fast with full set of PHP QA tools like PHPunit and xdebug installed and ready to use.">
+    <meta name="keywords" content="vagrant, LAMP, PHP development vagrant, vagrant PHP environment, vagrant LAMP stack, vagrant LAMP, quick LAMP development environment, PHP vagrant, virtualbox LAMP template, vagrant LAMP template, vagrant PHP remote debugging, PHP Vagrant debugging">
+
+    <meta name="viewport" content="width=device-width">
+
+    <!-- Bootstrap styles -->
+    <link rel="stylesheet" href="/css/vendor/bootstrap/bootstrap.css">
+    <link rel="stylesheet" href="/css/vendor/bootstrap/bootstrap-theme.css">
+    <link rel="stylesheet" href="/css/syntax.css">
+    <link rel="stylesheet" href="/css/pipe-devnull.css">
+
+
+    <!-- Font-Awesome -->
+    <link rel="stylesheet" href="/css/vendor/font-awesome/font-awesome.css">
+
+    <!-- Google Webfonts -->
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans:400,600|PT+Serif:400,400italic' rel='stylesheet' type='text/css'>
+
+    <!-- Styles -->
+    <link rel="stylesheet" href="/css/styles-bluegreen.css" id="theme-styles">
+
+    <!--[if lt IE 9]>
+        <link rel="stylesheet" href="css/ie8.css">        
+        <script src="js/vendor/google/html5-3.6-respond-1.1.0.min.js"></script>
+    <![endif]-->
+
+    <!-- Le fav and touch icons -->
+    <link rel="shortcut icon" href="/img/ico/favicon.ico">
+
+</head>
+
+
+<body>
+    <header>
+        <div class="widewrapper masthead">
+            <div class="container">
+                <a href="/index.html" class='logo'>
+                   <img src='/img/pipedevnull.png' alt='pipe-devnull'/>
+                </a>
+                <br/>
+                <span class='subtitle'>Blog: PHP, Python, Linux, Web services &amp; Continuous delivery</span>
+
+                <div id="mobile-nav-toggle" class="pull-right">
+                    <a href="#" data-toggle="collapse" data-target=".tales-nav .navbar-collapse">
+                        <i class="icon-reorder"></i>
+                    </a>
+                </div>
+
+                <nav class="pull-right tales-nav">
+                    <div class="collapse navbar-collapse">
+                        <ul class="nav nav-pills navbar-nav">
+                            <li>
+                                <a href="/">Blog</a>
+                            </li>
+                            <li>
+                                <a href="/about.html">About</a>
+                            </li>
+                            <li>
+                                <a href="/post-index.html">All Posts</a>
+                            </li>                        
+                        </ul>
+                    </div>
+                </nav>        
+
+            </div>
+        </div>
+
+        <!-- <div class="widewrapper subheader">
+            <div class="container">
+
+                <div class="tales-breadcrumb">
+                    <a href="#">Blog: PHP, Python, Linux, Web services &amp; Continuous delivery</a>
+                </div> 
+
+                <div class="tales-searchbox">
+                    <form action="#" method="get" accept-charset="utf-8">
+                        <button class="searchbutton" type="submit">
+                            <i class="icon-search"></i>
+                        </button>
+                        <input class="searchfield" id="searchbox" type="text" placeholder="Search">
+                    </form>
+                </div>
+            </div>
+        </div> -->
+    </header>
+
+    <div class="widewrapper main">
+        <div class="container">
+            <div class="row">
+                
+                <div class="col-md-8 blog-main">
+                    <section id="Entry">
+
+  <h1>Rapidly Building  LAMP Development Environments with Vagrant</h1>
+  
+  <p>Provisioning new Virtualbox LAMP development VMs from scratch can be dome with minimal effort using vagrant.  By making this process easy and fast I can dedicate an entire VM environment for each development project I have on hand and be sure that my environment remains consistent.  That last part is not new, we have been using VMs like this for years but in my experience the VMs often become too valuable because of the manual effort required for initial set up, provisioning software, and ongoing maintenance.  Vagrant scripts enable me to build and destroy VMs several times a day at speed, as and when required - removing the manual overhead.  </p>
+
+<p>No more &quot;it works on my machine&quot; scenarios, keep development environments isolated and in line with production specifications.</p>
+
+<!-- more -->
+
+<h4>Base Dev LAMP Stack spec</h4>
+
+<p><br/></p>
+
+<p>Available here <a href="https://github.com/pipe-devnull/vagrant-dev-lamp">https://github.com/pipe-devnull/vagrant-dev-lamp</a> my basic LAMP Development environment includes:  </p>
+
+<p><strong>UPDATE 30/07/2013:<strong> New version includes xhprof profiler built in, see <a href="/vagrant-dev-php-stack-with-profiler">PHP Vagrant development instance with xhprof profiler </a></p>
+
+<ul>
+<li><strong>Apache</strong>
+
+<ul>
+<li>mod_rewrite<br></li>
+<li>mod_php<br></li>
+<li>Named virtualhost set up<br>
+
+<ul>
+<li>Document root /vagrant/www/ (synched VM folder)</li>
+<li>Name lampdev</li>
+</ul></li>
+</ul></li>
+<li><strong>MySQL</strong></li>
+<li><strong>PHP</strong>
+
+<ul>
+<li>APC op-code cache<br></li>
+<li>PEAR<br></li>
+<li>PHP QA tools (phpunit, phpdoc, xhprof etc)<br></li>
+<li>XDebug - setup for remote debugging</li>
+</ul></li>
+<li><strong>Basic utilities</strong><br>
+
+<ul>
+<li>curl<br></li>
+<li>vim<br></li>
+</ul></li>
+<li><strong>Networking</strong>
+
+<ul>
+<li>VM Port 80 (http) traffic forwarded to port 8888 on host - point your browser at localhost:8888</li>
+<li>VM Port 22 (ssh) traffic forwarded to port 2222 on host - ssh to localhost:2222 </li>
+</ul></li>
+</ul>
+
+<h3>Quick Guide</h3>
+
+<p><strong>Pre-requisites:</strong><br>
+<strong>1.</strong> Install Virtualbox<br>
+<strong>2.</strong> Install vagrant<br>
+<strong>3.</strong> Install vagrant base box</p>
+<div class="highlight"><pre><code class="text language-text" data-lang="text"># You can use an alternative base box if you wish
+vagrant box add precise64 http://files.vagrantup.com/precise64.box
+</code></pre></div>
+<p>Then ...</p>
+<div class="highlight"><pre><code class="text language-text" data-lang="text"># Clone the Vagrant LAMP stack configuration
+git clone --recursive https://github.com/pipe-devnull/vagrant-dev-lamp.git
+# enter the cloned directory
+cd vagrant-dev-lamp
+# Build the VM using vagrant
+vagrant up
+</code></pre></div>
+<p>On my now slightly old dual core machine it takes about 7 minutes to build.</p>
+
+<p><br/></p>
+
+<h2>Base Box</h2>
+
+<p>If you want to change the base box you just need to add the box you do want into your environment (like in the command above) and then edit the Vagrantfile, replacing the base box name in the line <strong>config.vm.box = &quot;precise64&quot;</strong> with the one alternate one just added.  You can also build your own base box if you wish, there is also a tool available to help with that <a href="veewee">https://github.com/jedi4ever/veewee</a>.</p>
+
+<h2>Provisioning</h2>
+
+<p>Puppet, chef or shell? You can provision the software and services with any, I&#39;m using Puppet, mainly because I have some good modules that make installing Apache, MySQL, PHP and common PHP tools quick and easy, my requirements here are basic and you do not need to know huge amounts about Puppet to get things working.</p>
+
+<p>In order to use the puppet modules for provisioning within vagrant I&#39;ve included them as git submodules (inside the directory puppet/modules) and added a line into the vagrant file specifying where it should look for to find my puppet modules:</p>
+<div class="highlight"><pre><code class="text language-text" data-lang="text">config.vm.provision :puppet do |puppet|
+    puppet.manifests_path = &quot;puppet/manifests&quot;
+    puppet.module_path = &quot;puppet/modules&quot;
+    puppet.manifest_file  = &quot;lamp.pp&quot;
+end
+</code></pre></div>
+<h2>Remote Debugging</h2>
+
+<p>Remote debugging via xdebug is enabled during the VM creation, all you need to do is configure your IDE to use it.  Here are some instructions on how to do that using eclipse PDT.</p>
+
+<p>1 Go to Window &gt; Preferences<br>
+2 Drill down through PHP &gt; Debug &gt; Installed Debuggers<br>
+3 Select XDebug from the right hand side and click &#39;Configure&#39;<br>
+4 Change the setting &#39;Accept remote session (JIT)&#39; to &#39;localhost&#39; and click OK  </p>
+
+<p><img src="/img/vagrant-post/vagrant-eclipse-remote-debug-1.png" alt="eclipse remote debug config"></p>
+
+<p>5 In the same settings window drill down through PHP &gt; PHP Servers  </p>
+
+<p>6 Click the New button on the right hand side<br>
+...6.1 Name the server i.e. &#39;Remote&#39;<br>
+...6.2 Enter the base URL &#39;http://localhost:8888&#39;<br>
+...6.3 Enter the path to the web root, this is the path to the vagrant synced folder &#39;/path/to/vagrant/www&#39;<br>
+...6.4 Click &#39;Finish&#39; and then set the new server as the default (or optionally configure this manually when setting up each debug session)</p>
+
+<p><img src="/img/vagrant-post/vagrant-eclipse-remote-debug-2.png" alt="eclipse remote debug config"></p>
+
+<p>The above will work with the base LAMP stack, if you have multiple environments in play then you may have to change the port numbers in use appropriately.</p>
+
+<hr>
+
+<p>References:</p>
+
+<ul>
+<li>http://www.example42.com/<br></li>
+<li>http://puppetbox.es<br></li>
+<li>https://puppetlabs.com/<br></li>
+<li>https://github.com/rafaelfelix/puppet-pear.git - PHP PEAR puppet module<br></li>
+<li>https://github.com/rafaelfelix/puppet-phpqatools  - PHP QA tools puppet module<br></li>
+<li>http://phpqatools.org/<br></li>
+</ul>
+
+
+  <div id="disqus_thread"></div>
+<script type="text/javascript">
+
+    var disqus_shortname = 'pipe-devnull';
+    // Put in developer mode
+    //var disqus_developer = 1; // developer mode is on
+    // blog post title
+    //var disqus_identifier = '/article/name'
+   
+
+    /* * * DON'T EDIT BELOW THIS LINE * * */
+    (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = 'http://' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+
+<a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+
+</section>
+                </div>
+                
+                <aside class="col-md-4 blog-aside">
+   <div class="aside-widget clearfix">
+      <header>
+          <h3>Contact</h3>
+      </header>
+      <div class="body">
+        <a href="https://twitter.com/pipedevnull" class="twitter-follow-button" data-show-count="false" data-size="large">Follow @pipedevnull</a>
+        <script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+'://platform.twitter.com/widgets.js';fjs.parentNode.insertBefore(js,fjs);}}(document, 'script', 'twitter-wjs');</script>
+        <br/>
+        <p><a href="mailto:ade@pipe-devnull.com">ade@pipe-devnull.com</a></p>
+        <br/>
+      </div>
+  </div>
+   <div class="aside-widget  clearfix">
+      <header>
+          <h3>Github</h3>
+      </header>
+      <div class="body">
+        <a href='https://github.com/pipe-devnull'>github.com/pipe-devnull</a>
+        
+	<hr/>
+	<p class='lead'><a href="https://github.com/pipe-devnull/mink-behat-acceptance-test-demo">mink-behat-acceptance-test-demo</a></p>
+	<p class='small'>Example of using Behat, MInk & Mink Extension to build an acceptance (functional) test suite. (Forks: 0)</p>
+
+
+	<hr/>
+	<p class='lead'><a href="https://github.com/pipe-devnull/vagrant-dev-lamp">vagrant-dev-lamp</a></p>
+	<p class='small'>Base LAMP (PHP) stack with vagrant that includes remote debugging, profiling with xhprof and other common PHP QA tools. (Forks: 13)</p>
+
+
+	<hr/>
+	<p class='lead'><a href="https://github.com/pipe-devnull/ZF2Helper">ZF2Helper</a></p>
+	<p class='small'>Zend Framework 2 helper for Sublime Text 2 that helps automate the creation of new modules, controllers and actions. (Forks: 8)</p>
+
+
+      </div>
+  </div>
+   <div class="aside-widget">
+      <header>
+          <h3>Tags</h3>
+      </header>
+      <div class="body clearfix">
+          	<ul class='tags'>
+	
+		<li>
+			<a id="subversion" href="/tags/subversion.html">subversion</a>
+		</li>
+	
+		<li>
+			<a id="PHP" href="/tags/PHP.html">PHP</a>
+		</li>
+	
+		<li>
+			<a id="PHPUnit" href="/tags/PHPUnit.html">PHPUnit</a>
+		</li>
+	
+		<li>
+			<a id="ZendFramework" href="/tags/ZendFramework.html">ZendFramework</a>
+		</li>
+	
+		<li>
+			<a id="editors" href="/tags/editors.html">editors</a>
+		</li>
+	
+		<li>
+			<a id="SublimeText" href="/tags/SublimeText.html">SublimeText</a>
+		</li>
+	
+		<li>
+			<a id="Python" href="/tags/Python.html">Python</a>
+		</li>
+	
+		<li>
+			<a id="HTTP" href="/tags/HTTP.html">HTTP</a>
+		</li>
+	
+		<li>
+			<a id="git" href="/tags/git.html">git</a>
+		</li>
+	
+		<li>
+			<a id="Vagrant" href="/tags/Vagrant.html">Vagrant</a>
+		</li>
+	
+		<li>
+			<a id="Virtualbox" href="/tags/Virtualbox.html">Virtualbox</a>
+		</li>
+	
+		<li>
+			<a id="Puppet" href="/tags/Puppet.html">Puppet</a>
+		</li>
+	
+		<li>
+			<a id="BDD" href="/tags/BDD.html">BDD</a>
+		</li>
+	
+		<li>
+			<a id="Testing" href="/tags/Testing.html">Testing</a>
+		</li>
+	
+	</ul>
+
+      </div>
+  </div>
+</aside>
+            </div>
+        </div>
+    </div>
+
+        <footer>
+        <div class="widewrapper footer">
+            <div class="container">
+                <div class="row">
+                    <div class="col-md-4 footer-widget">
+                       <!--  <h3> <i class="icon-cog"></i>Statistics</h3>
+
+                        <span>Even we sometimes loose track of how many articles we actually have here.  This one helps:</span>
+
+                        <div class="stats">
+                            <div class="line">
+                                <span class="counter">27</span>
+                                <span class="caption">Articles</span>
+                            </div>
+                            <div class="line">
+                                <span class="counter">208</span>
+                                <span class="caption">Comments</span>
+                            </div>
+                            <div class="line">
+                                <span class="counter">2</span>
+                                <span class="caption">Authors</span>
+                            </div>                    
+                        </div> -->
+                    </div>
+
+                    <div class="col-md-4 footer-widget">
+                        <!-- <h3> <i class="icon-star"></i>Hall of Fame</h3>
+                        <ul class="tales-list">
+                            <li><a href="index.html">Why we Need to Encrypt All Communication</a></li>
+                            <li><a href="#">Selling is a Function of Design. Not Vice-Versa.</a></li>
+                            <li><a href="#">It’s Hard To Come Up With Dummy Titles</a></li>
+                            <li><a href="#">Why the Internet is Full of Cats</a></li>
+                            <li><a href="#">Last Made-Up Headline, I Swear!</a></li>
+                        </ul> -->
+                    </div>
+
+                    <div class="col-md-4 footer-widget">
+                        <h3> <i class="icon-cog"></i>Contact Me</h3>
+                        <span class="email">
+                            <a href="#">ade@pipe-devnull.com</a>,
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="widewrapper copyright">
+            <div class="container">
+                pipe-devnull.com &copy;  2013
+            </div>
+        </div>
+    </footer>
+
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+    <script>window.jQuery || document.write('<script src="/js/vendor/jquery/jquery-1.9.1.min.js"><\/script>')</script>    
+    <script src="/js/vendor/bootstrap/bootstrap.min.js"></script>
+    <script src="/js/vendor/modernizr/modernizr.js"></script>
+    <script src="/js/vendor/jquery.simplemodal.1.4.4.min.js"></script>
+    <script src="/js/null.js"></script>
+    <script type="text/javascript">
+
+      var _gaq = _gaq || [];
+      _gaq.push(['_setAccount', 'UA-34003533-1']);
+      _gaq.push(['_trackPageview']);
+
+      (function() {
+        var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+        ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+        var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+      })();
+
+    </script>
+
+</html>

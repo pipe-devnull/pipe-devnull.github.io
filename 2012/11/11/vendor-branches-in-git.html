@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<!--[if lt IE 7]>      <html class="no-js lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
+<!--[if IE 7]>         <html class="no-js lt-ie9 lt-ie8"> <![endif]-->
+<!--[if IE 8]>         <html class="no-js lt-ie9"> <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js"> <!--<![endif]-->
+<head>
+    <meta charset="utf-8">
+    <title>pipe /dev/null - Vendor Branches with Git (including third party code)</title>
+    <meta name="author" content="Adrian Bruce - pipe-devnull.com">
+    <meta name="description" content="How to include 3rd party code in from one git repository into another.  Looks at a way of replicating Subversion vendor branch functionality in git.">
+    <meta name="keywords" content="git, git subversion vendor branch, git vendor branches, git and third party repositories, git fork and submodule">
+
+    <meta name="viewport" content="width=device-width">
+
+    <!-- Bootstrap styles -->
+    <link rel="stylesheet" href="/css/vendor/bootstrap/bootstrap.css">
+    <link rel="stylesheet" href="/css/vendor/bootstrap/bootstrap-theme.css">
+    <link rel="stylesheet" href="/css/syntax.css">
+    <link rel="stylesheet" href="/css/pipe-devnull.css">
+
+
+    <!-- Font-Awesome -->
+    <link rel="stylesheet" href="/css/vendor/font-awesome/font-awesome.css">
+
+    <!-- Google Webfonts -->
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans:400,600|PT+Serif:400,400italic' rel='stylesheet' type='text/css'>
+
+    <!-- Styles -->
+    <link rel="stylesheet" href="/css/styles-bluegreen.css" id="theme-styles">
+
+    <!--[if lt IE 9]>
+        <link rel="stylesheet" href="css/ie8.css">        
+        <script src="js/vendor/google/html5-3.6-respond-1.1.0.min.js"></script>
+    <![endif]-->
+
+    <!-- Le fav and touch icons -->
+    <link rel="shortcut icon" href="/img/ico/favicon.ico">
+
+</head>
+
+
+<body>
+    <header>
+        <div class="widewrapper masthead">
+            <div class="container">
+                <a href="/index.html" class='logo'>
+                   <img src='/img/pipedevnull.png' alt='pipe-devnull'/>
+                </a>
+                <br/>
+                <span class='subtitle'>Blog: PHP, Python, Linux, Web services &amp; Continuous delivery</span>
+
+                <div id="mobile-nav-toggle" class="pull-right">
+                    <a href="#" data-toggle="collapse" data-target=".tales-nav .navbar-collapse">
+                        <i class="icon-reorder"></i>
+                    </a>
+                </div>
+
+                <nav class="pull-right tales-nav">
+                    <div class="collapse navbar-collapse">
+                        <ul class="nav nav-pills navbar-nav">
+                            <li>
+                                <a href="/">Blog</a>
+                            </li>
+                            <li>
+                                <a href="/about.html">About</a>
+                            </li>
+                            <li>
+                                <a href="/post-index.html">All Posts</a>
+                            </li>                        
+                        </ul>
+                    </div>
+                </nav>        
+
+            </div>
+        </div>
+
+        <!-- <div class="widewrapper subheader">
+            <div class="container">
+
+                <div class="tales-breadcrumb">
+                    <a href="#">Blog: PHP, Python, Linux, Web services &amp; Continuous delivery</a>
+                </div> 
+
+                <div class="tales-searchbox">
+                    <form action="#" method="get" accept-charset="utf-8">
+                        <button class="searchbutton" type="submit">
+                            <i class="icon-search"></i>
+                        </button>
+                        <input class="searchfield" id="searchbox" type="text" placeholder="Search">
+                    </form>
+                </div>
+            </div>
+        </div> -->
+    </header>
+
+    <div class="widewrapper main">
+        <div class="container">
+            <div class="row">
+                
+                <div class="col-md-8 blog-main">
+                    <section id="Entry">
+
+  <h1>Vendor Branches with Git (including third party code)</h1>
+  
+  <p>In Subverison, externals and vendor branches are used to include code from different repositories in your own projects.  Externals are used when we want to include code but have no need to modify it and a vendor branch would be used when we want to include code that we also need to make custom modifications to i.e. for a bug fix / security patch that we cannot wait for the maintainers of the third party code to fix.  </p>
+
+<p>I&#39;ve outlined three methods that you can use in git to include third party code:</p>
+
+<ol>
+<li><a href='#submodules'> Git submodules</a></li>
+<li><a href='#upstream-with-submodules'> Git Submodules with Upstream branching</a></li>
+<li><a href='#fork-and-submodule'> Fork and submodule</a></li>
+</ol>
+
+<!-- more -->
+
+<p>There are other techniques out there such as <strong>sub tree merging</strong> but this is not a widely adopted approach and in my experience makes future maintenance more awkward than it need be.</p>
+
+<p><br/></p>
+
+<h2>#1 Git Submodules</h2>
+
+<p><span name="submodules" id="submodules" style='display: block; position: relative; top: -100px; visibility: hidden;'/></p>
+
+<p>Use when you want to:</p>
+
+<ul>
+<li><strong>Integrate third party code that you will never need to modify into a subdirectory of your current project</strong></li>
+<li><strong>Track upstream changes to the third party code</strong></li>
+</ul>
+
+<p>This is the most straight forward and the most common way of including external code in one git repo into another. Although at a glance it may resemble an Subversion external there are some important differences.</p>
+
+<ul>
+<li>A git submodule will clone the entire target git repository where as a Subversion external can be set to any part of a target SVN repository. </li>
+<li>Git Submodules are not updated automatically on every pull where in Subversion your externals are kept up to date by default.  With Git the submodule references a particular commit, usually the HEAD at the time when you added the submodule.</li>
+<li>Git Submodules are not automatically cloned (see below) when you clone the main repository.</li>
+</ul>
+
+<p>Although this may sound a bit more restrictive at first it&#39;s actually a good thing as it means each of your repositories are much more likely to be organized for a single purpose which will help keeps things a lot cleaner.  I&#39;ve seen a few too many monolithic and slow Subversion repositories that have become a dumping ground for multiple projects.</p>
+
+<h3>Adding a git sub module</h3>
+
+<p>Submodules are added with just a few commands:</p>
+
+<div class="highlight"><pre><code class="bash"><span class="c"># Clone an existing repo (or create a new one)</span>
+git clone git@github.com:pipe-devnull/repoA.git
+
+<span class="c"># Add the submodule. The first part is the address of the repo you want to include and the second part is the path within your repo that the included repo (repoB) will be referenced</span>
+git submodule add git@github.com:pipe-devnull/repoB.git myLib/3rdPartySubmoduleExample
+
+<span class="c"># Do the usual add, commit and push to master</span>
+git add *
+git commit -a -m <span class="s2">&quot;added new submodule example&quot;</span>
+git push origin master
+</code></pre></div>
+
+<p>You should notice that a new file called <strong>.gitsubmodules</strong> has been created in the root of the repository.  This file contains the definitions of all submodules that belong to this repository and if you open it you will see the mapping between the local paths and 3rd party include.</p>
+<div class="highlight"><pre><code class="text language-text" data-lang="text">[submodule &quot;myLib/3rdPartySubmoduleExample&quot;]
+    path = myLib/3rdPartySubmoduleExample
+    url = git@github.com:pipe-devnull/repoB.git
+</code></pre></div>
+<h3>Git Submodules are not automatically cloned!</h3>
+
+<p>The annoying thing about submodules is that when you clone a repo that already contains submodules, the submodules are not automatically pulled down to your local copy. After the initial clone has finished you also need to run a <strong>git submodule init</strong> followed by a <strong>git submodule update</strong>.</p>
+<div class="highlight"><pre><code class="text language-text" data-lang="text"># Make a fresh clone of a git repository
+git clone git@github.com:pipe-devnull/repoA.git
+
+# Intialize submodules
+git submodule init
+
+# Pull down all submodule content locally
+git submodule update
+</code></pre></div>
+<p>Likewise when you pull changes into your main git repository by running <strong>git pull</strong> the submodules are not updated automatically.  You will have to explicitly run <strong>git pull</strong> within the submodules in order to keep them up to date.  If you have multiple submodules the following may command may be useful</p>
+<div class="highlight"><pre><code class="text language-text" data-lang="text">git submodule foreach git pull origin master
+</code></pre></div>
+<p><strong><strong>EDIT:</strong> Its far easier to add the --recursive flag to your original clone command which will then also initialize and update any submodules listed immediately after the initial clone has completed.</strong></p>
+
+<hr>
+
+<h2>#2 Upstream branching and git submodules</h2>
+
+<p><span name='upstream-with-submodules' id='upstream-with-submodules' style='display: block; position: relative; top: -100px; visibility: hidden;'/></p>
+
+<p>Use when you want to:</p>
+
+<ul>
+<li><strong>Integrate third party code in a subdirectory of your current project in and amongst your own files</strong></li>
+<li><strong>Make custom modifications to the third party library</strong></li>
+<li><strong>Track upstream changes to the third party code</strong></li>
+</ul>
+
+<p>As mentioned earlier submodules provide the ability for you to include external code but do not permit you to modify that code .  Its often the case that you start using a library supplied by a third party and soon find yourself needing to make some changes to it in order to support your own application.  Even if you try and contribute your changes upstream the contribution process could take months depending on the project.  </p>
+
+<p>Given this situation you now need to include the library, track any upstream changes and then maintain the changes you have made.  In Subversion we would use a vendor branch to handle this situation however in git we have to do things slightly differently.</p>
+
+<ol>
+<li> Create a new repository containing only a read me file with two branches: <strong>master</strong> and <strong>upstream</strong>.<br></li>
+<li> Get a copy of the 3rd party library code, unzip / untar it into the upstream branch, add the files and commit them. Make sure the copy does not contain a .git directory.</li>
+<li> Create a tag of the upstream branch that corresponds to the version of the library (i.e. 1.0.1.1)</li>
+<li> Switch back to the master branch and merge all contents from the upstream branch</li>
+<li> Make your modifications to the master branch</li>
+<li> Add this repository as a submodule of your project.</li>
+</ol>
+
+<p>In time, when a change is made to the library we can update the upstream branch with this new version and then merge those changes back into the master branch which also contains your own modifications.  Any conflicts can be resolved in this repo, away from your main project which is kept nice and clean. If a future version of the library is released that removes the need for you to maintain your customizations you can just replace the submodule definitions in your main project.</p>
+
+<h3>Doing it command by command</h3>
+
+<div class="highlight"><pre><code class="bash"><span class="c"># Clone new clean repo (only contains readme)</span>
+git clone git@github.com:pipe-devnull/upstream-branching.git
+<span class="c"># Create upstream </span>
+git checkout -b upstream
+<span class="c"># Push the new branch back to origin</span>
+git push origin upstream
+<span class="c"># Unpack the third party lib into the upstream branch</span>
+<span class="c"># tar -xzf thirdPartyLib.tar.gz .</span>
+<span class="c"># add, commit, tag and push back up to remote</span>
+git add * 
+git commit -a -m <span class="s2">&quot;V1 lib&quot;</span>
+git tag <span class="s2">&quot;v1.0.0&quot;</span>
+git push origin upstream
+
+<span class="c"># Switch back to master, merge from upstream  and push to master</span>
+git checkout master 
+git merge upstream
+git push
+</code></pre></div>
+
+<p>With the above done you can make your customizations to the library on the master branch and add the submodule into your own project&#39;s repository as described in #1.  Fast forward a few day, weeks or months when a new release of the third party library is available and you can upgrade your copy as follows.</p>
+
+<div class="highlight"><pre><code class="bash"><span class="c"># Branch master, this will be our upgrade branch</span>
+git branch upgrade
+<span class="c"># Switch to the original upstream branch</span>
+git checkout upstream
+rm -rf ThirdPartyLib
+<span class="c"># Unpack the new copy of the library</span>
+<span class="c"># tar -xzf thirdPartyLib.tar.gz .</span>
+git add *
+git commit -a -m <span class="s2">&quot;V 2.0.0&quot;</span>
+git tag <span class="s2">&quot;V2.0.0&quot;</span>
+<span class="c"># switch back to upgrade branch, merge from upstream</span>
+git checkout upgrade
+git merge upstream
+<span class="c"># Resolve any conflicts and then merge into master</span>
+git checkout master
+git merge upgrade
+</code></pre></div>
+
+<hr>
+
+<h2>#3 Fork and submodule</h2>
+
+<p><span name='fork-and-submodule' id='fork-and-submodule' style='display: block; position: relative; top: -100px; visibility: hidden;'/></p>
+
+<p>Use when you want to:</p>
+
+<ul>
+<li><strong>Integrate third party code in a subdirectory of your current project away from your own files</strong></li>
+<li><strong>Make custom modifications to the third party library</strong></li>
+<li><strong>Track upstream changes to the third party code</strong></li>
+</ul>
+
+<p>This is a good and easy option when you want to make some changes to a third party submodule that is not mixed in amongst your own files.  Fork the target repo and the include that fork as the submodule rather than the original version.</p>
+
+<p>You can update the fork as often as you like and commit your own changes to that fork.  The repo that contains the submodule can remain isolated from the thrid party code but you still get to safely make the changes tho the third party code that you needed to. </p>
+
+
+  <div id="disqus_thread"></div>
+<script type="text/javascript">
+
+    var disqus_shortname = 'pipe-devnull';
+    // Put in developer mode
+    //var disqus_developer = 1; // developer mode is on
+    // blog post title
+    //var disqus_identifier = '/article/name'
+   
+
+    /* * * DON'T EDIT BELOW THIS LINE * * */
+    (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = 'http://' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+
+<a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+
+</section>
+                </div>
+                
+                <aside class="col-md-4 blog-aside">
+   <div class="aside-widget clearfix">
+      <header>
+          <h3>Contact</h3>
+      </header>
+      <div class="body">
+        <a href="https://twitter.com/pipedevnull" class="twitter-follow-button" data-show-count="false" data-size="large">Follow @pipedevnull</a>
+        <script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+'://platform.twitter.com/widgets.js';fjs.parentNode.insertBefore(js,fjs);}}(document, 'script', 'twitter-wjs');</script>
+        <br/>
+        <p><a href="mailto:ade@pipe-devnull.com">ade@pipe-devnull.com</a></p>
+        <br/>
+      </div>
+  </div>
+   <div class="aside-widget  clearfix">
+      <header>
+          <h3>Github</h3>
+      </header>
+      <div class="body">
+        <a href='https://github.com/pipe-devnull'>github.com/pipe-devnull</a>
+        
+	<hr/>
+	<p class='lead'><a href="https://github.com/pipe-devnull/mink-behat-acceptance-test-demo">mink-behat-acceptance-test-demo</a></p>
+	<p class='small'>Example of using Behat, MInk & Mink Extension to build an acceptance (functional) test suite. (Forks: 0)</p>
+
+
+	<hr/>
+	<p class='lead'><a href="https://github.com/pipe-devnull/vagrant-dev-lamp">vagrant-dev-lamp</a></p>
+	<p class='small'>Base LAMP (PHP) stack with vagrant that includes remote debugging, profiling with xhprof and other common PHP QA tools. (Forks: 13)</p>
+
+
+	<hr/>
+	<p class='lead'><a href="https://github.com/pipe-devnull/ZF2Helper">ZF2Helper</a></p>
+	<p class='small'>Zend Framework 2 helper for Sublime Text 2 that helps automate the creation of new modules, controllers and actions. (Forks: 8)</p>
+
+
+      </div>
+  </div>
+   <div class="aside-widget">
+      <header>
+          <h3>Tags</h3>
+      </header>
+      <div class="body clearfix">
+          	<ul class='tags'>
+	
+		<li>
+			<a id="subversion" href="/tags/subversion.html">subversion</a>
+		</li>
+	
+		<li>
+			<a id="PHP" href="/tags/PHP.html">PHP</a>
+		</li>
+	
+		<li>
+			<a id="PHPUnit" href="/tags/PHPUnit.html">PHPUnit</a>
+		</li>
+	
+		<li>
+			<a id="ZendFramework" href="/tags/ZendFramework.html">ZendFramework</a>
+		</li>
+	
+		<li>
+			<a id="editors" href="/tags/editors.html">editors</a>
+		</li>
+	
+		<li>
+			<a id="SublimeText" href="/tags/SublimeText.html">SublimeText</a>
+		</li>
+	
+		<li>
+			<a id="Python" href="/tags/Python.html">Python</a>
+		</li>
+	
+		<li>
+			<a id="HTTP" href="/tags/HTTP.html">HTTP</a>
+		</li>
+	
+		<li>
+			<a id="git" href="/tags/git.html">git</a>
+		</li>
+	
+		<li>
+			<a id="Vagrant" href="/tags/Vagrant.html">Vagrant</a>
+		</li>
+	
+		<li>
+			<a id="Virtualbox" href="/tags/Virtualbox.html">Virtualbox</a>
+		</li>
+	
+		<li>
+			<a id="Puppet" href="/tags/Puppet.html">Puppet</a>
+		</li>
+	
+		<li>
+			<a id="BDD" href="/tags/BDD.html">BDD</a>
+		</li>
+	
+		<li>
+			<a id="Testing" href="/tags/Testing.html">Testing</a>
+		</li>
+	
+	</ul>
+
+      </div>
+  </div>
+</aside>
+            </div>
+        </div>
+    </div>
+
+        <footer>
+        <div class="widewrapper footer">
+            <div class="container">
+                <div class="row">
+                    <div class="col-md-4 footer-widget">
+                       <!--  <h3> <i class="icon-cog"></i>Statistics</h3>
+
+                        <span>Even we sometimes loose track of how many articles we actually have here.  This one helps:</span>
+
+                        <div class="stats">
+                            <div class="line">
+                                <span class="counter">27</span>
+                                <span class="caption">Articles</span>
+                            </div>
+                            <div class="line">
+                                <span class="counter">208</span>
+                                <span class="caption">Comments</span>
+                            </div>
+                            <div class="line">
+                                <span class="counter">2</span>
+                                <span class="caption">Authors</span>
+                            </div>                    
+                        </div> -->
+                    </div>
+
+                    <div class="col-md-4 footer-widget">
+                        <!-- <h3> <i class="icon-star"></i>Hall of Fame</h3>
+                        <ul class="tales-list">
+                            <li><a href="index.html">Why we Need to Encrypt All Communication</a></li>
+                            <li><a href="#">Selling is a Function of Design. Not Vice-Versa.</a></li>
+                            <li><a href="#">It’s Hard To Come Up With Dummy Titles</a></li>
+                            <li><a href="#">Why the Internet is Full of Cats</a></li>
+                            <li><a href="#">Last Made-Up Headline, I Swear!</a></li>
+                        </ul> -->
+                    </div>
+
+                    <div class="col-md-4 footer-widget">
+                        <h3> <i class="icon-cog"></i>Contact Me</h3>
+                        <span class="email">
+                            <a href="#">ade@pipe-devnull.com</a>,
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="widewrapper copyright">
+            <div class="container">
+                pipe-devnull.com &copy;  2013
+            </div>
+        </div>
+    </footer>
+
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+    <script>window.jQuery || document.write('<script src="/js/vendor/jquery/jquery-1.9.1.min.js"><\/script>')</script>    
+    <script src="/js/vendor/bootstrap/bootstrap.min.js"></script>
+    <script src="/js/vendor/modernizr/modernizr.js"></script>
+    <script src="/js/vendor/jquery.simplemodal.1.4.4.min.js"></script>
+    <script src="/js/null.js"></script>
+    <script type="text/javascript">
+
+      var _gaq = _gaq || [];
+      _gaq.push(['_setAccount', 'UA-34003533-1']);
+      _gaq.push(['_trackPageview']);
+
+      (function() {
+        var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+        ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+        var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+      })();
+
+    </script>
+
+</html>

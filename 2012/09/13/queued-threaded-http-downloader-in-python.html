@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<!--[if lt IE 7]>      <html class="no-js lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
+<!--[if IE 7]>         <html class="no-js lt-ie9 lt-ie8"> <![endif]-->
+<!--[if IE 8]>         <html class="no-js lt-ie9"> <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js"> <!--<![endif]-->
+<head>
+    <meta charset="utf-8">
+    <title>pipe /dev/null - A multi-threaded downloader script with URL queuing</title>
+    <meta name="author" content="Adrian Bruce - pipe-devnull.com">
+    <meta name="description" content="A python HTTP multi-threaded downloader script with thread safe queuing. Example of standard thread and queue libraries but also uses the requests HTTP library">
+    <meta name="keywords" content="threaded downloaded, thread download, python downloader, queue thread download, queue download script">
+
+    <meta name="viewport" content="width=device-width">
+
+    <!-- Bootstrap styles -->
+    <link rel="stylesheet" href="/css/vendor/bootstrap/bootstrap.css">
+    <link rel="stylesheet" href="/css/vendor/bootstrap/bootstrap-theme.css">
+    <link rel="stylesheet" href="/css/syntax.css">
+    <link rel="stylesheet" href="/css/pipe-devnull.css">
+
+
+    <!-- Font-Awesome -->
+    <link rel="stylesheet" href="/css/vendor/font-awesome/font-awesome.css">
+
+    <!-- Google Webfonts -->
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans:400,600|PT+Serif:400,400italic' rel='stylesheet' type='text/css'>
+
+    <!-- Styles -->
+    <link rel="stylesheet" href="/css/styles-bluegreen.css" id="theme-styles">
+
+    <!--[if lt IE 9]>
+        <link rel="stylesheet" href="css/ie8.css">        
+        <script src="js/vendor/google/html5-3.6-respond-1.1.0.min.js"></script>
+    <![endif]-->
+
+    <!-- Le fav and touch icons -->
+    <link rel="shortcut icon" href="/img/ico/favicon.ico">
+
+</head>
+
+
+<body>
+    <header>
+        <div class="widewrapper masthead">
+            <div class="container">
+                <a href="/index.html" class='logo'>
+                   <img src='/img/pipedevnull.png' alt='pipe-devnull'/>
+                </a>
+                <br/>
+                <span class='subtitle'>Blog: PHP, Python, Linux, Web services &amp; Continuous delivery</span>
+
+                <div id="mobile-nav-toggle" class="pull-right">
+                    <a href="#" data-toggle="collapse" data-target=".tales-nav .navbar-collapse">
+                        <i class="icon-reorder"></i>
+                    </a>
+                </div>
+
+                <nav class="pull-right tales-nav">
+                    <div class="collapse navbar-collapse">
+                        <ul class="nav nav-pills navbar-nav">
+                            <li>
+                                <a href="/">Blog</a>
+                            </li>
+                            <li>
+                                <a href="/about.html">About</a>
+                            </li>
+                            <li>
+                                <a href="/post-index.html">All Posts</a>
+                            </li>                        
+                        </ul>
+                    </div>
+                </nav>        
+
+            </div>
+        </div>
+
+        <!-- <div class="widewrapper subheader">
+            <div class="container">
+
+                <div class="tales-breadcrumb">
+                    <a href="#">Blog: PHP, Python, Linux, Web services &amp; Continuous delivery</a>
+                </div> 
+
+                <div class="tales-searchbox">
+                    <form action="#" method="get" accept-charset="utf-8">
+                        <button class="searchbutton" type="submit">
+                            <i class="icon-search"></i>
+                        </button>
+                        <input class="searchfield" id="searchbox" type="text" placeholder="Search">
+                    </form>
+                </div>
+            </div>
+        </div> -->
+    </header>
+
+    <div class="widewrapper main">
+        <div class="container">
+            <div class="row">
+                
+                <div class="col-md-8 blog-main">
+                    <section id="Entry">
+
+  <h1>A multi-threaded downloader script with URL queuing</h1>
+  
+  <p>I created this script in order to try out the standard queue and thread libraries in Python.  It doesn&#39;t do anything exciting but can be quite useful if you have a bunch of files to download.  It accepts either a list of files as a command line parameter or a path to a JSON file, the format of which is outlined a bit further down. </p>
+
+<p>Read about the python queue library in the docs <a href="http://docs.python.org/library/queue.html">here</a> and the thread library <a href="http://docs.python.org/library/threading.html">here</a>. It also requires the requests library to fetch the resources (see earlier post on <a href="http://pipe-devnull.com/fetching-http-resources-in-python-using-the-requests-library">Downloading HTTP resources in python using the requests library</a> )</p>
+
+<!-- more -->
+
+<p>I&#39;ll add an example in a future post of how to write a basic web crawler / spider using <a href="http://scrapy.org/">scrapy</a> that outputs results to a JSON file which can then be fed into this downloader script.</p>
+
+<h2>Script overview:</h2>
+
+<p>The script contains a <em>downloader</em> class, a <em>download_manager</em> class and a main entry function that parses CLI arguments, JSON files etc. The download manager class has two basic responsibilities:</p>
+
+<ul>
+<li>Create a queue of URLs that are to be downloaded</li>
+<li>Create a thread pool of n threads and register the queue with each thread</li>
+</ul>
+
+<p>Which just leaves the downloader responsible for:</p>
+
+<ul>
+<li>Fetching a URL from the queue and downloading it using the requests library </li>
+<li>Writing the fetched resource to the local file system</li>
+<li>Timing the download<br></li>
+</ul>
+
+<h3>Sample usage:</h3>
+
+<div class="highlight"><pre><code class="bash">pydownload.py ./output_directory/ -i &lt;JSONinputfile&gt;  -f &lt;url1,url2,url3...&gt;
+</code></pre></div>
+
+<h3>Sample Output:</h3>
+
+<div class="highlight"><pre><code class="bash">----------pydownnload---------------
+
+JSON file:             download-items.json
+Output Directory:      ./test/
+File list:             None
+
+* Thread 39541d3a6cc3851db70d6b220264a3ce - processing URL
+* Thread 51c43adfd6228462fe8548352cbc682b - processing URL
+* Thread: caf11370ca87b10c1b518626e5ee3b80 Downloaded http://pipe-devnull.com/static/samples/download/Faith_no_More_King_For_A_Day.mp3 in 2.94 seconds
+* Thread: 39541d3a6cc3851db70d6b220264a3ce Downloaded http://pipe-devnull.com/static/samples/download/John_Frusciante_Walls_and_Doors.mp3 in 3.33 seconds
+</code></pre></div>
+
+<p>If you want to pass a JSON file to the script the JSON file must conform to the following format:</p>
+<div class="highlight"><pre><code class="text language-text" data-lang="text">[
+{&quot;link_name&quot;: &quot;Faith_no_More_King_For_A_Day.mp3&quot;, &quot;link_address&quot;: &quot;http://pipe-devnull.com/static/samples/download/Faith_no_More_King_For_A_Day.mp3&quot;},
+{&quot;link_name&quot;: &quot;John_Frusciante_Walls_and_Doors.mp&quot;, &quot;link_address&quot;: &quot;http://pipe-devnull.com/static/samples/download/John_Frusciante_Walls_and_Doors.mp&quot;},
+]
+</code></pre></div>
+<p><a href="/static/samples/python/pydownload/download-items.json"><em>download sample JSON file</em></a></p>
+
+<h2>The Code:</h2>
+
+<p><a href="/static/samples/python/pydownload/pydownload.py"><em>download pydownload.py</em></a></p>
+
+<div class="highlight"><pre><code class="python"><span class="lineno">  1</span> <span class="c"># Multi purpose downloader script</span>
+<span class="lineno">  2</span> <span class="c"># </span>
+<span class="lineno">  3</span> <span class="c"># - requests library for HTTP operations</span>
+<span class="lineno">  4</span> <span class="c"># - standard library&#39;s queue library </span>
+<span class="lineno">  5</span> <span class="c"># - standard library&#39;s threads library</span>
+<span class="lineno">  6</span> 
+<span class="lineno">  7</span> <span class="kn">import</span> <span class="nn">os</span>
+<span class="lineno">  8</span> <span class="kn">import</span> <span class="nn">Queue</span>
+<span class="lineno">  9</span> <span class="kn">import</span> <span class="nn">threading</span>
+<span class="lineno"> 10</span> <span class="kn">import</span> <span class="nn">sys</span>
+<span class="lineno"> 11</span> <span class="kn">import</span> <span class="nn">getopt</span>
+<span class="lineno"> 12</span> <span class="kn">import</span> <span class="nn">requests</span>
+<span class="lineno"> 13</span> <span class="kn">import</span> <span class="nn">json</span>
+<span class="lineno"> 14</span> <span class="kn">import</span> <span class="nn">time</span>
+<span class="lineno"> 15</span> 
+<span class="lineno"> 16</span> 
+<span class="lineno"> 17</span> <span class="c">#Downloader class - reads queue and downloads each file in succession</span>
+<span class="lineno"> 18</span> <span class="k">class</span> <span class="nc">Downloader</span><span class="p">(</span><span class="n">threading</span><span class="o">.</span><span class="n">Thread</span><span class="p">):</span>
+<span class="lineno"> 19</span>     <span class="sd">&quot;&quot;&quot;Threaded File Downloader&quot;&quot;&quot;</span>
+<span class="lineno"> 20</span> 
+<span class="lineno"> 21</span>     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">queue</span><span class="p">,</span> <span class="n">output_directory</span><span class="p">):</span>
+<span class="lineno"> 22</span>             <span class="n">threading</span><span class="o">.</span><span class="n">Thread</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">name</span><span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">urandom</span><span class="p">(</span><span class="mi">16</span><span class="p">)</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s">&#39;hex&#39;</span><span class="p">))</span>
+<span class="lineno"> 23</span>             <span class="bp">self</span><span class="o">.</span><span class="n">queue</span> <span class="o">=</span> <span class="n">queue</span>
+<span class="lineno"> 24</span>             <span class="bp">self</span><span class="o">.</span><span class="n">output_directory</span> <span class="o">=</span> <span class="n">output_directory</span>
+<span class="lineno"> 25</span> 
+<span class="lineno"> 26</span>     <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="lineno"> 27</span>         <span class="k">while</span> <span class="bp">True</span><span class="p">:</span>
+<span class="lineno"> 28</span>             <span class="c"># gets the url from the queue</span>
+<span class="lineno"> 29</span>             <span class="n">url</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">queue</span><span class="o">.</span><span class="n">get</span><span class="p">()</span>
+<span class="lineno"> 30</span> 
+<span class="lineno"> 31</span>             <span class="c"># download the file</span>
+<span class="lineno"> 32</span>             <span class="k">print</span> <span class="s">&quot;* Thread &quot;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">+</span> <span class="s">&quot; - processing URL&quot;</span>
+<span class="lineno"> 33</span>             <span class="bp">self</span><span class="o">.</span><span class="n">download_file</span><span class="p">(</span><span class="n">url</span><span class="p">)</span>
+<span class="lineno"> 34</span> 
+<span class="lineno"> 35</span>             <span class="c"># send a signal to the queue that the job is done</span>
+<span class="lineno"> 36</span>             <span class="bp">self</span><span class="o">.</span><span class="n">queue</span><span class="o">.</span><span class="n">task_done</span><span class="p">()</span>
+<span class="lineno"> 37</span> 
+<span class="lineno"> 38</span>     <span class="k">def</span> <span class="nf">download_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">url</span><span class="p">):</span>
+<span class="lineno"> 39</span>         <span class="n">t_start</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">clock</span><span class="p">()</span>
+<span class="lineno"> 40</span> 
+<span class="lineno"> 41</span>         <span class="n">r</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">url</span><span class="p">)</span>
+<span class="lineno"> 42</span>         <span class="k">if</span> <span class="p">(</span><span class="n">r</span><span class="o">.</span><span class="n">status_code</span> <span class="o">==</span> <span class="n">requests</span><span class="o">.</span><span class="n">codes</span><span class="o">.</span><span class="n">ok</span><span class="p">):</span>
+<span class="lineno"> 43</span>             <span class="n">t_elapsed</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">clock</span><span class="p">()</span> <span class="o">-</span> <span class="n">t_start</span>
+<span class="lineno"> 44</span>             <span class="k">print</span> <span class="s">&quot;* Thread: &quot;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">+</span> <span class="s">&quot; Downloaded &quot;</span> <span class="o">+</span> <span class="n">url</span> <span class="o">+</span> <span class="s">&quot; in &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">t_elapsed</span><span class="p">)</span> <span class="o">+</span> <span class="s">&quot; seconds&quot;</span>
+<span class="lineno"> 45</span>             <span class="n">fname</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_directory</span> <span class="o">+</span> <span class="s">&quot;/&quot;</span> <span class="o">+</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">url</span><span class="p">)</span>
+<span class="lineno"> 46</span> 
+<span class="lineno"> 47</span>             <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">fname</span><span class="p">,</span> <span class="s">&quot;wb&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+<span class="lineno"> 48</span>                 <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">r</span><span class="o">.</span><span class="n">content</span><span class="p">)</span>
+<span class="lineno"> 49</span>         <span class="k">else</span><span class="p">:</span>
+<span class="lineno"> 50</span>             <span class="k">print</span> <span class="s">&quot;* Thread: &quot;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">+</span> <span class="s">&quot; Bad URL: &quot;</span> <span class="o">+</span> <span class="n">url</span>
+<span class="lineno"> 51</span> 
+<span class="lineno"> 52</span> 
+<span class="lineno"> 53</span> <span class="c"># Spawns dowloader threads and manages URL downloads queue</span>
+<span class="lineno"> 54</span> <span class="k">class</span> <span class="nc">DownloadManager</span><span class="p">():</span>
+<span class="lineno"> 55</span> 
+<span class="lineno"> 56</span>     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">download_dict</span><span class="p">,</span> <span class="n">output_directory</span><span class="p">,</span> <span class="n">thread_count</span><span class="o">=</span><span class="mi">5</span><span class="p">):</span>
+<span class="lineno"> 57</span>         <span class="bp">self</span><span class="o">.</span><span class="n">thread_count</span> <span class="o">=</span> <span class="n">thread_count</span>
+<span class="lineno"> 58</span>         <span class="bp">self</span><span class="o">.</span><span class="n">download_dict</span> <span class="o">=</span> <span class="n">download_dict</span>
+<span class="lineno"> 59</span>         <span class="bp">self</span><span class="o">.</span><span class="n">output_directory</span> <span class="o">=</span> <span class="n">output_directory</span>
+<span class="lineno"> 60</span> 
+<span class="lineno"> 61</span>     <span class="c"># Start the downloader threads, fill the queue with the URLs and</span>
+<span class="lineno"> 62</span>     <span class="c"># then feed the threads URLs via the queue</span>
+<span class="lineno"> 63</span>     <span class="k">def</span> <span class="nf">begin_downloads</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="lineno"> 64</span>         <span class="n">queue</span> <span class="o">=</span> <span class="n">Queue</span><span class="o">.</span><span class="n">Queue</span><span class="p">()</span>
+<span class="lineno"> 65</span> 
+<span class="lineno"> 66</span>         <span class="c"># Create a thread pool and give them a queue</span>
+<span class="lineno"> 67</span>         <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">thread_count</span><span class="p">):</span>
+<span class="lineno"> 68</span>             <span class="n">t</span> <span class="o">=</span> <span class="n">Downloader</span><span class="p">(</span><span class="n">queue</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_directory</span><span class="p">)</span>
+<span class="lineno"> 69</span>             <span class="n">t</span><span class="o">.</span><span class="n">setDaemon</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+<span class="lineno"> 70</span>             <span class="n">t</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+<span class="lineno"> 71</span> 
+<span class="lineno"> 72</span>         <span class="c"># Load the queue from the download dict</span>
+<span class="lineno"> 73</span>         <span class="k">for</span> <span class="n">linkname</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">download_dict</span><span class="p">:</span>
+<span class="lineno"> 74</span>             <span class="c">#print uri</span>
+<span class="lineno"> 75</span>             <span class="n">queue</span><span class="o">.</span><span class="n">put</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">download_dict</span><span class="p">[</span><span class="n">linkname</span><span class="p">])</span>
+<span class="lineno"> 76</span> 
+<span class="lineno"> 77</span>         <span class="c"># Wait for the queue to finish</span>
+<span class="lineno"> 78</span>         <span class="n">queue</span><span class="o">.</span><span class="n">join</span><span class="p">()</span>
+<span class="lineno"> 79</span> 
+<span class="lineno"> 80</span>         <span class="k">return</span>
+<span class="lineno"> 81</span> 
+<span class="lineno"> 82</span> 
+<span class="lineno"> 83</span> <span class="c"># Main.  Parse CLIoptions, prepare download list &amp; start downloading</span>
+<span class="lineno"> 84</span> <span class="k">def</span> <span class="nf">main</span><span class="p">(</span><span class="n">argv</span><span class="p">):</span>
+<span class="lineno"> 85</span>     <span class="n">inputfile</span> <span class="o">=</span> <span class="bp">None</span>
+<span class="lineno"> 86</span>     <span class="n">flist</span> <span class="o">=</span> <span class="bp">None</span>
+<span class="lineno"> 87</span>     <span class="n">help</span> <span class="o">=</span> <span class="s">&#39;pydownload.py ./output_directory/ -i &lt;JSONinputfile&gt;  -f &lt;url1,url2,url3...&gt;&#39;</span>
+<span class="lineno"> 88</span>     <span class="k">try</span><span class="p">:</span>
+<span class="lineno"> 89</span>         <span class="n">opts</span><span class="p">,</span> <span class="n">args</span> <span class="o">=</span> <span class="n">getopt</span><span class="o">.</span><span class="n">getopt</span><span class="p">(</span><span class="n">argv</span><span class="p">,</span> <span class="s">&quot;hi:f:&quot;</span><span class="p">,</span> <span class="p">[</span><span class="s">&quot;ifile=&quot;</span><span class="p">,</span> <span class="s">&quot;flist=&quot;</span><span class="p">])</span>
+<span class="lineno"> 90</span>     <span class="k">except</span> <span class="n">getopt</span><span class="o">.</span><span class="n">GetoptError</span><span class="p">:</span>
+<span class="lineno"> 91</span>         <span class="k">print</span> <span class="n">help</span>
+<span class="lineno"> 92</span>         <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+<span class="lineno"> 93</span> 
+<span class="lineno"> 94</span>     <span class="c"># Check for required script argument output dir</span>
+<span class="lineno"> 95</span>     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+<span class="lineno"> 96</span>         <span class="n">output_directory</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+<span class="lineno"> 97</span>     <span class="k">else</span><span class="p">:</span>
+<span class="lineno"> 98</span>         <span class="k">print</span> <span class="n">help</span>
+<span class="lineno"> 99</span>         <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+<span class="lineno">100</span> 
+<span class="lineno">101</span>     <span class="k">for</span> <span class="n">opt</span><span class="p">,</span> <span class="n">arg</span> <span class="ow">in</span> <span class="n">opts</span><span class="p">:</span>
+<span class="lineno">102</span>         <span class="k">if</span> <span class="n">opt</span> <span class="o">==</span> <span class="s">&#39;-h&#39;</span><span class="p">:</span>
+<span class="lineno">103</span>             <span class="k">print</span> <span class="n">help</span>
+<span class="lineno">104</span>             <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+<span class="lineno">105</span>         <span class="k">elif</span> <span class="n">opt</span> <span class="ow">in</span> <span class="p">(</span><span class="s">&quot;-i&quot;</span><span class="p">,</span> <span class="s">&quot;--ifile&quot;</span><span class="p">):</span>
+<span class="lineno">106</span>             <span class="n">inputfile</span> <span class="o">=</span> <span class="n">arg</span>
+<span class="lineno">107</span>         <span class="k">elif</span> <span class="n">opt</span> <span class="ow">in</span> <span class="p">(</span><span class="s">&quot;-f&quot;</span><span class="p">,</span> <span class="s">&quot;--flist&quot;</span><span class="p">):</span>
+<span class="lineno">108</span>             <span class="n">flist</span> <span class="o">=</span> <span class="p">[</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">arg</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&#39;,&#39;</span><span class="p">)]</span>
+<span class="lineno">109</span> 
+<span class="lineno">110</span>     <span class="k">print</span> <span class="s">&#39;----------pydownnload---------------&#39;</span>
+<span class="lineno">111</span>     <span class="k">print</span> <span class="s">&#39;------------------------------------&#39;</span>
+<span class="lineno">112</span>     <span class="k">print</span> <span class="s">&#39;JSON file:             &#39;</span><span class="p">,</span> <span class="n">inputfile</span>
+<span class="lineno">113</span>     <span class="k">print</span> <span class="s">&#39;Output Directory:      &#39;</span><span class="p">,</span> <span class="n">output_directory</span>
+<span class="lineno">114</span>     <span class="k">print</span> <span class="s">&#39;File list:             &#39;</span><span class="p">,</span> <span class="n">flist</span>
+<span class="lineno">115</span>     <span class="k">print</span> <span class="s">&#39;------------------------------------&#39;</span>
+<span class="lineno">116</span> 
+<span class="lineno">117</span>     <span class="c"># Now build a dict of urls to download, just add any flist urls</span>
+<span class="lineno">118</span>     <span class="n">download_dict</span> <span class="o">=</span> <span class="p">{}</span>
+<span class="lineno">119</span> 
+<span class="lineno">120</span>     <span class="c"># If the input file is supplied then parse it as JSON and add to dict of URLS</span>
+<span class="lineno">121</span>     <span class="k">if</span> <span class="p">(</span><span class="n">inputfile</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">):</span>
+<span class="lineno">122</span>         <span class="n">fp</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">inputfile</span><span class="p">)</span>
+<span class="lineno">123</span>         <span class="n">url_list</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">fp</span><span class="p">)</span>
+<span class="lineno">124</span>         <span class="k">for</span> <span class="n">url</span> <span class="ow">in</span> <span class="n">url_list</span><span class="p">:</span>
+<span class="lineno">125</span>             <span class="n">download_dict</span><span class="p">[</span><span class="n">url</span><span class="p">[</span><span class="s">&#39;link_name&#39;</span><span class="p">]]</span> <span class="o">=</span> <span class="n">url</span><span class="p">[</span><span class="s">&#39;link_address&#39;</span><span class="p">]</span>
+<span class="lineno">126</span> 
+<span class="lineno">127</span>      <span class="c"># Add in any additional files contained in the flist variable</span>
+<span class="lineno">128</span>     <span class="k">if</span> <span class="p">(</span><span class="n">flist</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">):</span>
+<span class="lineno">129</span>     <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">flist</span><span class="p">:</span>
+<span class="lineno">130</span>         <span class="n">download_dict</span><span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">f</span><span class="p">)]</span> <span class="o">=</span> <span class="n">f</span>
+<span class="lineno">131</span> 
+<span class="lineno">132</span>     <span class="c"># If there are no URLs to download then exit now, nothing to do!</span>
+<span class="lineno">133</span>     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">download_dict</span><span class="p">)</span> <span class="ow">is</span> <span class="mi">0</span><span class="p">:</span>
+<span class="lineno">134</span>         <span class="k">print</span> <span class="s">&quot;* No URLs to download, got the usage right?&quot;</span>
+<span class="lineno">135</span>         <span class="k">print</span> <span class="s">&quot;USAGE: &quot;</span> <span class="o">+</span> <span class="n">help</span>
+<span class="lineno">136</span>         <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+<span class="lineno">137</span> 
+<span class="lineno">138</span>     <span class="n">download_manager</span> <span class="o">=</span> <span class="n">DownloadManager</span><span class="p">(</span><span class="n">download_dict</span><span class="p">,</span> <span class="n">output_directory</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span>
+<span class="lineno">139</span>     <span class="n">download_manager</span><span class="o">.</span><span class="n">begin_downloads</span><span class="p">()</span>
+<span class="lineno">140</span> 
+<span class="lineno">141</span> <span class="c"># Kick off</span>
+<span class="lineno">142</span> <span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s">&quot;__main__&quot;</span><span class="p">:</span>
+<span class="lineno">143</span>     <span class="n">main</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">[</span><span class="mi">1</span><span class="p">:])</span>
+</code></pre></div>
+
+
+  <div id="disqus_thread"></div>
+<script type="text/javascript">
+
+    var disqus_shortname = 'pipe-devnull';
+    // Put in developer mode
+    //var disqus_developer = 1; // developer mode is on
+    // blog post title
+    //var disqus_identifier = '/article/name'
+   
+
+    /* * * DON'T EDIT BELOW THIS LINE * * */
+    (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = 'http://' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+
+<a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+
+</section>
+                </div>
+                
+                <aside class="col-md-4 blog-aside">
+   <div class="aside-widget clearfix">
+      <header>
+          <h3>Contact</h3>
+      </header>
+      <div class="body">
+        <a href="https://twitter.com/pipedevnull" class="twitter-follow-button" data-show-count="false" data-size="large">Follow @pipedevnull</a>
+        <script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+'://platform.twitter.com/widgets.js';fjs.parentNode.insertBefore(js,fjs);}}(document, 'script', 'twitter-wjs');</script>
+        <br/>
+        <p><a href="mailto:ade@pipe-devnull.com">ade@pipe-devnull.com</a></p>
+        <br/>
+      </div>
+  </div>
+   <div class="aside-widget  clearfix">
+      <header>
+          <h3>Github</h3>
+      </header>
+      <div class="body">
+        <a href='https://github.com/pipe-devnull'>github.com/pipe-devnull</a>
+        
+	<hr/>
+	<p class='lead'><a href="https://github.com/pipe-devnull/mink-behat-acceptance-test-demo">mink-behat-acceptance-test-demo</a></p>
+	<p class='small'>Example of using Behat, MInk & Mink Extension to build an acceptance (functional) test suite. (Forks: 0)</p>
+
+
+	<hr/>
+	<p class='lead'><a href="https://github.com/pipe-devnull/vagrant-dev-lamp">vagrant-dev-lamp</a></p>
+	<p class='small'>Base LAMP (PHP) stack with vagrant that includes remote debugging, profiling with xhprof and other common PHP QA tools. (Forks: 13)</p>
+
+
+	<hr/>
+	<p class='lead'><a href="https://github.com/pipe-devnull/ZF2Helper">ZF2Helper</a></p>
+	<p class='small'>Zend Framework 2 helper for Sublime Text 2 that helps automate the creation of new modules, controllers and actions. (Forks: 8)</p>
+
+
+      </div>
+  </div>
+   <div class="aside-widget">
+      <header>
+          <h3>Tags</h3>
+      </header>
+      <div class="body clearfix">
+          	<ul class='tags'>
+	
+		<li>
+			<a id="subversion" href="/tags/subversion.html">subversion</a>
+		</li>
+	
+		<li>
+			<a id="PHP" href="/tags/PHP.html">PHP</a>
+		</li>
+	
+		<li>
+			<a id="PHPUnit" href="/tags/PHPUnit.html">PHPUnit</a>
+		</li>
+	
+		<li>
+			<a id="ZendFramework" href="/tags/ZendFramework.html">ZendFramework</a>
+		</li>
+	
+		<li>
+			<a id="editors" href="/tags/editors.html">editors</a>
+		</li>
+	
+		<li>
+			<a id="SublimeText" href="/tags/SublimeText.html">SublimeText</a>
+		</li>
+	
+		<li>
+			<a id="Python" href="/tags/Python.html">Python</a>
+		</li>
+	
+		<li>
+			<a id="HTTP" href="/tags/HTTP.html">HTTP</a>
+		</li>
+	
+		<li>
+			<a id="git" href="/tags/git.html">git</a>
+		</li>
+	
+		<li>
+			<a id="Vagrant" href="/tags/Vagrant.html">Vagrant</a>
+		</li>
+	
+		<li>
+			<a id="Virtualbox" href="/tags/Virtualbox.html">Virtualbox</a>
+		</li>
+	
+		<li>
+			<a id="Puppet" href="/tags/Puppet.html">Puppet</a>
+		</li>
+	
+		<li>
+			<a id="BDD" href="/tags/BDD.html">BDD</a>
+		</li>
+	
+		<li>
+			<a id="Testing" href="/tags/Testing.html">Testing</a>
+		</li>
+	
+	</ul>
+
+      </div>
+  </div>
+</aside>
+            </div>
+        </div>
+    </div>
+
+        <footer>
+        <div class="widewrapper footer">
+            <div class="container">
+                <div class="row">
+                    <div class="col-md-4 footer-widget">
+                       <!--  <h3> <i class="icon-cog"></i>Statistics</h3>
+
+                        <span>Even we sometimes loose track of how many articles we actually have here.  This one helps:</span>
+
+                        <div class="stats">
+                            <div class="line">
+                                <span class="counter">27</span>
+                                <span class="caption">Articles</span>
+                            </div>
+                            <div class="line">
+                                <span class="counter">208</span>
+                                <span class="caption">Comments</span>
+                            </div>
+                            <div class="line">
+                                <span class="counter">2</span>
+                                <span class="caption">Authors</span>
+                            </div>                    
+                        </div> -->
+                    </div>
+
+                    <div class="col-md-4 footer-widget">
+                        <!-- <h3> <i class="icon-star"></i>Hall of Fame</h3>
+                        <ul class="tales-list">
+                            <li><a href="index.html">Why we Need to Encrypt All Communication</a></li>
+                            <li><a href="#">Selling is a Function of Design. Not Vice-Versa.</a></li>
+                            <li><a href="#">It’s Hard To Come Up With Dummy Titles</a></li>
+                            <li><a href="#">Why the Internet is Full of Cats</a></li>
+                            <li><a href="#">Last Made-Up Headline, I Swear!</a></li>
+                        </ul> -->
+                    </div>
+
+                    <div class="col-md-4 footer-widget">
+                        <h3> <i class="icon-cog"></i>Contact Me</h3>
+                        <span class="email">
+                            <a href="#">ade@pipe-devnull.com</a>,
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="widewrapper copyright">
+            <div class="container">
+                pipe-devnull.com &copy;  2013
+            </div>
+        </div>
+    </footer>
+
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+    <script>window.jQuery || document.write('<script src="/js/vendor/jquery/jquery-1.9.1.min.js"><\/script>')</script>    
+    <script src="/js/vendor/bootstrap/bootstrap.min.js"></script>
+    <script src="/js/vendor/modernizr/modernizr.js"></script>
+    <script src="/js/vendor/jquery.simplemodal.1.4.4.min.js"></script>
+    <script src="/js/null.js"></script>
+    <script type="text/javascript">
+
+      var _gaq = _gaq || [];
+      _gaq.push(['_setAccount', 'UA-34003533-1']);
+      _gaq.push(['_trackPageview']);
+
+      (function() {
+        var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+        ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+        var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+      })();
+
+    </script>
+
+</html>

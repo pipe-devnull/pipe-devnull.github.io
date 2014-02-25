@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<!--[if lt IE 7]>      <html class="no-js lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
+<!--[if IE 7]>         <html class="no-js lt-ie9 lt-ie8"> <![endif]-->
+<!--[if IE 8]>         <html class="no-js lt-ie9"> <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js"> <!--<![endif]-->
+<head>
+    <meta charset="utf-8">
+    <title>pipe /dev/null - Experimenting with virtualenv</title>
+    <meta name="author" content="Adrian Bruce - pipe-devnull.com">
+    <meta name="description" content="How to use the Python virtualenv library to create isolated Python development Environments.  Create isolated environments using different versions of python and choose between distribute or setuptools for package management">
+    <meta name="keywords" content="virtualenv, Python, distribute, pip, different python versions, multiple python versions, virtualenv tutorial, virtualenv development setup">
+
+    <meta name="viewport" content="width=device-width">
+
+    <!-- Bootstrap styles -->
+    <link rel="stylesheet" href="/css/vendor/bootstrap/bootstrap.css">
+    <link rel="stylesheet" href="/css/vendor/bootstrap/bootstrap-theme.css">
+    <link rel="stylesheet" href="/css/syntax.css">
+    <link rel="stylesheet" href="/css/pipe-devnull.css">
+
+
+    <!-- Font-Awesome -->
+    <link rel="stylesheet" href="/css/vendor/font-awesome/font-awesome.css">
+
+    <!-- Google Webfonts -->
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans:400,600|PT+Serif:400,400italic' rel='stylesheet' type='text/css'>
+
+    <!-- Styles -->
+    <link rel="stylesheet" href="/css/styles-bluegreen.css" id="theme-styles">
+
+    <!--[if lt IE 9]>
+        <link rel="stylesheet" href="css/ie8.css">        
+        <script src="js/vendor/google/html5-3.6-respond-1.1.0.min.js"></script>
+    <![endif]-->
+
+    <!-- Le fav and touch icons -->
+    <link rel="shortcut icon" href="/img/ico/favicon.ico">
+
+</head>
+
+
+<body>
+    <header>
+        <div class="widewrapper masthead">
+            <div class="container">
+                <a href="/index.html" class='logo'>
+                   <img src='/img/pipedevnull.png' alt='pipe-devnull'/>
+                </a>
+                <br/>
+                <span class='subtitle'>Blog: PHP, Python, Linux, Web services &amp; Continuous delivery</span>
+
+                <div id="mobile-nav-toggle" class="pull-right">
+                    <a href="#" data-toggle="collapse" data-target=".tales-nav .navbar-collapse">
+                        <i class="icon-reorder"></i>
+                    </a>
+                </div>
+
+                <nav class="pull-right tales-nav">
+                    <div class="collapse navbar-collapse">
+                        <ul class="nav nav-pills navbar-nav">
+                            <li>
+                                <a href="/">Blog</a>
+                            </li>
+                            <li>
+                                <a href="/about.html">About</a>
+                            </li>
+                            <li>
+                                <a href="/post-index.html">All Posts</a>
+                            </li>                        
+                        </ul>
+                    </div>
+                </nav>        
+
+            </div>
+        </div>
+
+        <!-- <div class="widewrapper subheader">
+            <div class="container">
+
+                <div class="tales-breadcrumb">
+                    <a href="#">Blog: PHP, Python, Linux, Web services &amp; Continuous delivery</a>
+                </div> 
+
+                <div class="tales-searchbox">
+                    <form action="#" method="get" accept-charset="utf-8">
+                        <button class="searchbutton" type="submit">
+                            <i class="icon-search"></i>
+                        </button>
+                        <input class="searchfield" id="searchbox" type="text" placeholder="Search">
+                    </form>
+                </div>
+            </div>
+        </div> -->
+    </header>
+
+    <div class="widewrapper main">
+        <div class="container">
+            <div class="row">
+                
+                <div class="col-md-8 blog-main">
+                    <section id="Entry">
+
+  <h1>Experimenting with virtualenv</h1>
+  
+  <p><a href="http://pypi.python.org/pypi/virtualenv">virtualenv</a> is a great tool that you can use to create isolated python environments that contain their own installation directories, libraries and package managers.  This isolation enables you to control package dependencies at the application level rather than the system level and helps avoid the situation where upgrading a system library for the benefit of one application would cause a different application to break. However, its important to note that it does still share the base system&#39;s python installation with the virtual environment. </p>
+
+<p>Its stable enough for production and provides the opportunity to ship your application with all dependencies bundled in.  This is how I&#39;ve been using it for development, all examples are in the context of installation on Debian Linux.</p>
+
+<!-- more -->
+
+<h2>Create a new virtualenv</h2>
+
+<p>I generally use pip to install packages so I include the &#39;--distibute&#39; option.  There are also other options (i.e. --extra-search-dir) to share some system locations with the virtualenv but I prefer to keep them as separate as possible.</p>
+
+<p>You can store config options in a configuration file to save typing them every time, by default virtualenv will have a look for the config file <strong>virtualenv.ini</strong> in the directory <strong>$HOME/.virtualenv/</strong>.</p>
+
+<div class="highlight"><pre><code class="bash"><span class="c"># create a new virtual environment with distribute rather than setuptools</span>
+python virtualenv --distribute MyVirtualEnv
+</code></pre></div>
+
+<p>A new directory, MyVirtualEnv, will be placed within the current working directory.  Here is a quick look at what is created:</p>
+
+<p>&nbsp;</p>
+
+<blockquote>
+<p>MyVirtualEnv/</p>
+
+<p>&nbsp;&nbsp; bin/</p>
+
+<p>&nbsp;&nbsp; include/</p>
+
+<p>&nbsp;&nbsp; lib/</p>
+
+<p>&nbsp;&nbsp; Python2.7/</p>
+
+<p>&nbsp;&nbsp;&nbsp;&nbsp; abc.py -&gt; /usr/lib/python2.7/abc.py</p>
+
+<p>&nbsp;&nbsp;&nbsp;&nbsp; codecs.py -&gt; /usr/lib/python2.7/codecs.py</p>
+
+<p>&nbsp;&nbsp;&nbsp;&nbsp; <em>etc.....</em></p>
+
+<p>&nbsp;&nbsp; local/     </p>
+</blockquote>
+
+<p>&nbsp;</p>
+
+<ul>
+<li><p>The <em>bin</em> directory contains the python interpreter that the virtual environment will use.  The <strong>pip</strong> and <strong>easy_install</strong> package management scripts and several virtualenv activation scripts that we use (see below) to step into the new virtualenv are also found here.</p></li>
+<li><p>The <em>include</em> directory   contains a symlink to the system location /usr/include/pythonX.X. /usr/include/ is where all of the system&#39;s general-use include files for the C and C++ programming languages are placed.</p></li>
+<li><p>The <em>lib</em> directory contains symlinks to the base system&#39;s python library for the version of python that you create the environment in.</p></li>
+<li><p>The <em>local</em> directory contains just 3 symlinks for bin, include and lib which point to the three directories listed above.</p></li>
+</ul>
+
+<p>Now the environment is created we can step into it.  To do this we use the activate script in our virtualenv bin directory</p>
+
+<div class="highlight"><pre><code class="bash"><span class="nb">source </span>MyVirtualEnv/bin/activate
+</code></pre></div>
+
+<p>Your command line should now be prefixed with &#39;(MyVirtualEnv)&#39; which means  that any python, pip and easy_install commands  will be executed in the context of your virtualenv. For example:</p>
+
+<div class="highlight"><pre><code class="bash">which pip
+<span class="c"># outputs /path/to/your/virtualenv/MyVirtualEnv/bin/pip</span>
+which python
+<span class="c"># outputs /path/to/your/virtualenv/MyVirtualEnv/bin/python</span>
+</code></pre></div>
+
+<p>Now I&#39;ll install some packages that I&#39;m experimenting with and do some development...</p>
+
+<div class="highlight"><pre><code class="bash">pip install requests
+pip install scrapy
+</code></pre></div>
+
+<p>When your finished and want to throw everything away all you need to do is just delete the MyVirtualEnv directory.</p>
+
+<h2>Virtualenv with different versions of Python</h2>
+
+<p>As shown above, the environment created with virtualenv uses the base system&#39;s python installation.  If you have multiple versions of Python installed then you can tell virtualenv which one to use when you initially create the environment using the &#39;--python&#39; option.  For example, If i had Python version 2.7 and Python version 3.0 installed on my OS and I want to create a virtualenv environment using version 3.0 of Python I would run the following:</p>
+
+<div class="highlight"><pre><code class="bash">python virtualenv --distribute -p virtualenv --python<span class="o">=</span>/usr/bin/python3.0 MyVirtualEnv 
+</code></pre></div>
+
+<p>If you examine the MyVirtualEnv/lib directory then you should see a Python3.0 sub directory that contains symlinks to your OS&#39;s python 3 libraries.</p>
+
+
+  <div id="disqus_thread"></div>
+<script type="text/javascript">
+
+    var disqus_shortname = 'pipe-devnull';
+    // Put in developer mode
+    //var disqus_developer = 1; // developer mode is on
+    // blog post title
+    //var disqus_identifier = '/article/name'
+   
+
+    /* * * DON'T EDIT BELOW THIS LINE * * */
+    (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = 'http://' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+
+<a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+
+</section>
+                </div>
+                
+                <aside class="col-md-4 blog-aside">
+   <div class="aside-widget clearfix">
+      <header>
+          <h3>Contact</h3>
+      </header>
+      <div class="body">
+        <a href="https://twitter.com/pipedevnull" class="twitter-follow-button" data-show-count="false" data-size="large">Follow @pipedevnull</a>
+        <script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+'://platform.twitter.com/widgets.js';fjs.parentNode.insertBefore(js,fjs);}}(document, 'script', 'twitter-wjs');</script>
+        <br/>
+        <p><a href="mailto:ade@pipe-devnull.com">ade@pipe-devnull.com</a></p>
+        <br/>
+      </div>
+  </div>
+   <div class="aside-widget  clearfix">
+      <header>
+          <h3>Github</h3>
+      </header>
+      <div class="body">
+        <a href='https://github.com/pipe-devnull'>github.com/pipe-devnull</a>
+        
+	<hr/>
+	<p class='lead'><a href="https://github.com/pipe-devnull/mink-behat-acceptance-test-demo">mink-behat-acceptance-test-demo</a></p>
+	<p class='small'>Example of using Behat, MInk & Mink Extension to build an acceptance (functional) test suite. (Forks: 0)</p>
+
+
+	<hr/>
+	<p class='lead'><a href="https://github.com/pipe-devnull/vagrant-dev-lamp">vagrant-dev-lamp</a></p>
+	<p class='small'>Base LAMP (PHP) stack with vagrant that includes remote debugging, profiling with xhprof and other common PHP QA tools. (Forks: 13)</p>
+
+
+	<hr/>
+	<p class='lead'><a href="https://github.com/pipe-devnull/ZF2Helper">ZF2Helper</a></p>
+	<p class='small'>Zend Framework 2 helper for Sublime Text 2 that helps automate the creation of new modules, controllers and actions. (Forks: 8)</p>
+
+
+      </div>
+  </div>
+   <div class="aside-widget">
+      <header>
+          <h3>Tags</h3>
+      </header>
+      <div class="body clearfix">
+          	<ul class='tags'>
+	
+		<li>
+			<a id="subversion" href="/tags/subversion.html">subversion</a>
+		</li>
+	
+		<li>
+			<a id="PHP" href="/tags/PHP.html">PHP</a>
+		</li>
+	
+		<li>
+			<a id="PHPUnit" href="/tags/PHPUnit.html">PHPUnit</a>
+		</li>
+	
+		<li>
+			<a id="ZendFramework" href="/tags/ZendFramework.html">ZendFramework</a>
+		</li>
+	
+		<li>
+			<a id="editors" href="/tags/editors.html">editors</a>
+		</li>
+	
+		<li>
+			<a id="SublimeText" href="/tags/SublimeText.html">SublimeText</a>
+		</li>
+	
+		<li>
+			<a id="Python" href="/tags/Python.html">Python</a>
+		</li>
+	
+		<li>
+			<a id="HTTP" href="/tags/HTTP.html">HTTP</a>
+		</li>
+	
+		<li>
+			<a id="git" href="/tags/git.html">git</a>
+		</li>
+	
+		<li>
+			<a id="Vagrant" href="/tags/Vagrant.html">Vagrant</a>
+		</li>
+	
+		<li>
+			<a id="Virtualbox" href="/tags/Virtualbox.html">Virtualbox</a>
+		</li>
+	
+		<li>
+			<a id="Puppet" href="/tags/Puppet.html">Puppet</a>
+		</li>
+	
+		<li>
+			<a id="BDD" href="/tags/BDD.html">BDD</a>
+		</li>
+	
+		<li>
+			<a id="Testing" href="/tags/Testing.html">Testing</a>
+		</li>
+	
+	</ul>
+
+      </div>
+  </div>
+</aside>
+            </div>
+        </div>
+    </div>
+
+        <footer>
+        <div class="widewrapper footer">
+            <div class="container">
+                <div class="row">
+                    <div class="col-md-4 footer-widget">
+                       <!--  <h3> <i class="icon-cog"></i>Statistics</h3>
+
+                        <span>Even we sometimes loose track of how many articles we actually have here.  This one helps:</span>
+
+                        <div class="stats">
+                            <div class="line">
+                                <span class="counter">27</span>
+                                <span class="caption">Articles</span>
+                            </div>
+                            <div class="line">
+                                <span class="counter">208</span>
+                                <span class="caption">Comments</span>
+                            </div>
+                            <div class="line">
+                                <span class="counter">2</span>
+                                <span class="caption">Authors</span>
+                            </div>                    
+                        </div> -->
+                    </div>
+
+                    <div class="col-md-4 footer-widget">
+                        <!-- <h3> <i class="icon-star"></i>Hall of Fame</h3>
+                        <ul class="tales-list">
+                            <li><a href="index.html">Why we Need to Encrypt All Communication</a></li>
+                            <li><a href="#">Selling is a Function of Design. Not Vice-Versa.</a></li>
+                            <li><a href="#">It’s Hard To Come Up With Dummy Titles</a></li>
+                            <li><a href="#">Why the Internet is Full of Cats</a></li>
+                            <li><a href="#">Last Made-Up Headline, I Swear!</a></li>
+                        </ul> -->
+                    </div>
+
+                    <div class="col-md-4 footer-widget">
+                        <h3> <i class="icon-cog"></i>Contact Me</h3>
+                        <span class="email">
+                            <a href="#">ade@pipe-devnull.com</a>,
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="widewrapper copyright">
+            <div class="container">
+                pipe-devnull.com &copy;  2013
+            </div>
+        </div>
+    </footer>
+
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+    <script>window.jQuery || document.write('<script src="/js/vendor/jquery/jquery-1.9.1.min.js"><\/script>')</script>    
+    <script src="/js/vendor/bootstrap/bootstrap.min.js"></script>
+    <script src="/js/vendor/modernizr/modernizr.js"></script>
+    <script src="/js/vendor/jquery.simplemodal.1.4.4.min.js"></script>
+    <script src="/js/null.js"></script>
+    <script type="text/javascript">
+
+      var _gaq = _gaq || [];
+      _gaq.push(['_setAccount', 'UA-34003533-1']);
+      _gaq.push(['_trackPageview']);
+
+      (function() {
+        var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+        ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+        var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+      })();
+
+    </script>
+
+</html>
