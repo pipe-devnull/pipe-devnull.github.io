@@ -1,1 +1,382 @@
-TEST
+<!DOCTYPE html>
+<!--[if lt IE 7]>      <html class="no-js lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
+<!--[if IE 7]>         <html class="no-js lt-ie9 lt-ie8"> <![endif]-->
+<!--[if IE 8]>         <html class="no-js lt-ie9"> <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js"> <!--<![endif]-->
+<head>
+    <meta charset="utf-8">
+    <title>pipe /dev/null - pipe-devnull - Blog for PHP, Python, Linux, Web services, Continuous delivery</title>
+    <meta name="author" content="Adrian Bruce - pipe-devnull.com">
+    <meta name="description" content="Blog for thoughts, notes and opinions on a range of tech subjects such as PHP, Python, Linux, Web services, Continuous delivery and whatever else I come across in work and play.">
+    <meta name="keywords" content="PHP, Python, Linux, Web services, Continuous delivery">
+
+    <meta name="viewport" content="width=device-width">
+
+    <!-- Bootstrap styles -->
+    <link rel="stylesheet" href="/css/vendor/bootstrap/bootstrap.css">
+    <link rel="stylesheet" href="/css/vendor/bootstrap/bootstrap-theme.css">
+    <link rel="stylesheet" href="/css/syntax.css">
+    <link rel="stylesheet" href="/css/pipe-devnull.css">
+
+
+    <!-- Font-Awesome -->
+    <link rel="stylesheet" href="/css/vendor/font-awesome/font-awesome.css">
+
+    <!-- Google Webfonts -->
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans:400,600|PT+Serif:400,400italic' rel='stylesheet' type='text/css'>
+
+    <!-- Styles -->
+    <link rel="stylesheet" href="/css/styles-bluegreen.css" id="theme-styles">
+
+    <!--[if lt IE 9]>
+        <link rel="stylesheet" href="css/ie8.css">        
+        <script src="js/vendor/google/html5-3.6-respond-1.1.0.min.js"></script>
+    <![endif]-->
+
+    <!-- Le fav and touch icons -->
+    <link rel="shortcut icon" href="/img/ico/favicon.ico">
+
+</head>
+
+
+<body>
+    <header>
+        <div class="widewrapper masthead">
+            <div class="container">
+                <a href="/index.html" class='logo'>
+                   <img src='/img/pipedevnull.png' alt='pipe-devnull'/>
+                </a>
+                <br/>
+                <span class='subtitle'>Blog: PHP, Python, Linux, Web services &amp; Continuous delivery</span>
+
+                <div id="mobile-nav-toggle" class="pull-right">
+                    <a href="#" data-toggle="collapse" data-target=".tales-nav .navbar-collapse">
+                        <i class="icon-reorder"></i>
+                    </a>
+                </div>
+
+                <nav class="pull-right tales-nav">
+                    <div class="collapse navbar-collapse">
+                        <ul class="nav nav-pills navbar-nav">
+                            <li>
+                                <a href="/">Blog</a>
+                            </li>
+                            <li>
+                                <a href="/about.html">About</a>
+                            </li>
+                            <li>
+                                <a href="/post-index.html">All Posts</a>
+                            </li>                        
+                        </ul>
+                    </div>
+                </nav>        
+
+            </div>
+        </div>
+
+        <!-- <div class="widewrapper subheader">
+            <div class="container">
+
+                <div class="tales-breadcrumb">
+                    <a href="#">Blog: PHP, Python, Linux, Web services &amp; Continuous delivery</a>
+                </div> 
+
+                <div class="tales-searchbox">
+                    <form action="#" method="get" accept-charset="utf-8">
+                        <button class="searchbutton" type="submit">
+                            <i class="icon-search"></i>
+                        </button>
+                        <input class="searchfield" id="searchbox" type="text" placeholder="Search">
+                    </form>
+                </div>
+            </div>
+        </div> -->
+    </header>
+
+    <div class="widewrapper main">
+        <div class="container">
+            <div class="row">
+                
+                <div class="col-md-8 blog-main">
+                    
+<section id='entry' class="entry">
+
+  <h2 class='page-header'><a href="/2013/12/17/mink-behat-automated-browser-testing-in-plain-english.html">Automated Browser Acceptance Testing with Behat & Mink</a> <span class='posttitleside'>(17 Dec 2013)</span></h2>
+  <div class='extract'>
+    <p>This post accompanies a project I&#39;ve put on Github that provides an example of how to use Behat &amp; Mink to create automated browser based acceptance tests.  By combining the concepts and tooling from Behavior Driven Development (BDD) with remote browser driver technologies, we will describe the desired behavior of a system and then transform these descriptions into test simulations running in real web browsers. The intention of both the demo project and the post is to highlight that:</p>
+
+<ul>
+<li>Driving your acceptance testing process with BDD techniques is a valuable concept</li>
+<li>Behat and Mink are a solid choice for implementing acceptance tests</li>
+</ul>
+
+<p>The demo project consists of a web site that sells ascii art (The Ascii Art Marketplace) and a test suite that covers the features &#39;add to basket&#39; and &#39;newsletter sign up&#39;. It also contains a wrapper script that will run the tests in either phantomJS or Selenium, this can be useful when hooking things up with Continuous Integration (CI). For more info on using phantomJS with Mink &amp; Behat see <strong><a href="phantomjs-mink-behat">this section</a></strong> a bit further down.</p>
+
+<p>In this post, I&#39;m mainly providing some background and ramblings around BDD, why automating acceptance testing is so valuable and general information on Behat &amp; Mink.  If your already familiar with this stuff then you might want to skip straight to the github repo at <strong><a href='https://github.com/pipe-devnull/mink-behat-acceptance-test-demo'>https://github.com/pipe-devnull/mink-behat-acceptance-test-demo</a></strong>  </p>
+ 
+  </div>
+    
+  <a href="/2013/12/17/mink-behat-automated-browser-testing-in-plain-english.html" class="btn btn-tales-one">Read more</a><br/>
+
+</section>
+
+<section id='entry' class="entry">
+
+  <h2 class='page-header'><a href="/2013/09/20/puppet-ensure-class-execution-ordering.html">Ensure the execution order of classes in Puppet using stages</a> <span class='posttitleside'>(20 Sep 2013)</span></h2>
+  <div class='extract'>
+    <p>In order to keep puppet manifests readable I&#39;m organising the configuration using classes that (roughly) group steps by function such as PHP configuration, VHOST setup or Ruby installation.  One of the main problems I (and several of my colleagues) were finding is that the order in which puppet classes are executed can change between one provision run and the next.  However, with a little research (AKA reading the manual) I came across <strong>stages</strong> which exist to help with this very problem.</p>
+
+<h3>Puppet Stages</h3>
+
+<p>Puppet allows you to take a phased approach with the provisioning process, part of the stage definition is to declare if this stage should be executed before or after other stages.  Once a stage is defined you then assign classes to it for execution.  Puppet defines a &#39;main&#39; stage by default in which all classes are added unless you specifically assign them to another stage as just described.  The main stage is the starting point from which we reference when creating further stages.</p>
+ 
+  </div>
+    
+  <a href="/2013/09/20/puppet-ensure-class-execution-ordering.html" class="btn btn-tales-one">Read more</a><br/>
+
+</section>
+
+<section id='entry' class="entry">
+
+  <h2 class='page-header'><a href="/2013/08/01/vagrant-dev-php-stack-with-profiler.html">PHP Vagrant development instance with xhprof profiler</a> <span class='posttitleside'>(01 Aug 2013)</span></h2>
+  <div class='extract'>
+    <p>I&#39;ve just added support for xhprof profiler into my base vagrant LAMP (<em>PHP</em>) stack  .  It automatically adds profiling to any PHP file that is served from the default virtual host (document root: /vagrant/www/) and includes a link at the footer of each page over to the xhprof output.  Graphviz has also been installed so callgraphs are generated if you want something more visual.</p>
+
+<p>The vagrant instance is available on github here:  <a href="https://github.com/pipe-devnull/vagrant-dev-lamp">https://github.com/pipe-devnull/vagrant-dev-lamp</a></p>
+ 
+  </div>
+    
+  <a href="/2013/08/01/vagrant-dev-php-stack-with-profiler.html" class="btn btn-tales-one">Read more</a><br/>
+
+</section>
+
+<section id='entry' class="entry">
+
+  <h2 class='page-header'><a href="/2013/04/24/vagrant-base-dev-lamp-stack.html">Rapidly Building  LAMP Development Environments with Vagrant</a> <span class='posttitleside'>(24 Apr 2013)</span></h2>
+  <div class='extract'>
+    <p>Provisioning new Virtualbox LAMP development VMs from scratch can be dome with minimal effort using vagrant.  By making this process easy and fast I can dedicate an entire VM environment for each development project I have on hand and be sure that my environment remains consistent.  That last part is not new, we have been using VMs like this for years but in my experience the VMs often become too valuable because of the manual effort required for initial set up, provisioning software, and ongoing maintenance.  Vagrant scripts enable me to build and destroy VMs several times a day at speed, as and when required - removing the manual overhead.  </p>
+
+<p>No more &quot;it works on my machine&quot; scenarios, keep development environments isolated and in line with production specifications.</p>
+ 
+  </div>
+    
+  <a href="/2013/04/24/vagrant-base-dev-lamp-stack.html" class="btn btn-tales-one">Read more</a><br/>
+
+</section>
+
+<section id='entry' class="entry">
+
+  <h2 class='page-header'><a href="/2013/01/10/zend-framework-2-sublimetext2-helper.html">Zend Framework 2 helper plugin for Sublime Text 2</a> <span class='posttitleside'>(10 Jan 2013)</span></h2>
+  <div class='extract'>
+    <p>I started writing a plug-in for SublimeText 2 to speed up the development of Zend Framework 2 (ZF2) applications called <strong>ZF2Helper</strong>.  So far I&#39;ve implemented a couple of features and I intend to add more as and when I come across a ZF2 task that would benefit from some automation.  Below is a quick example of using ZF2Helper to create new ZF2 modules and new controller actions.  The full source is available on github: <a href="https://github.com/pipe-devnull/ZF2Helper" title="ZF2 Helper on github">https://github.com/pipe-devnull/ZF2Helper</a> and the package can be installed in Sublime Text 2 using <a href="http://wbond.net/sublime_packages/package_control" title="Package Control">package_control</a>.</p>
+
+<p><br/></p>
+
+<h3>Creating ZF2 Modules with ZF2Helper</h3>
+
+<p>Create an entirely new ZF2 module with 1 click rather than copying, pasting, renaming all files individually. Much quicker :)</p>
+
+<p>This option is only available in the side bar context menu.</p>
+
+<ol>
+<li>In the side bar, navigate through to the root of the ZF2 modules directory</li>
+<li>Right click on the modules folder and select &quot;ZF2Helper &gt; New ZF2 Module&quot;</li>
+<li>Input the name of the new module into the prompt</li>
+<li>Add the name of the module into the main ZF2 Application configuration file (ApplicationRoot / config / application.config.php)</li>
+</ol>
+ 
+  </div>
+    
+  <a href="/2013/01/10/zend-framework-2-sublimetext2-helper.html" class="btn btn-tales-one">Read more</a><br/>
+
+</section>
+
+
+
+<br/>
+<p class='lead'><a href="/post-index.html">All Posts</a></p>
+
+                </div>
+                
+                <aside class="col-md-4 blog-aside">
+   <div class="aside-widget clearfix">
+      <header>
+          <h3>Contact</h3>
+      </header>
+      <div class="body">
+        <a href="https://twitter.com/pipedevnull" class="twitter-follow-button" data-show-count="false" data-size="large">Follow @pipedevnull</a>
+        <script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+'://platform.twitter.com/widgets.js';fjs.parentNode.insertBefore(js,fjs);}}(document, 'script', 'twitter-wjs');</script>
+        <br/>
+        <p><a href="mailto:ade@pipe-devnull.com">ade@pipe-devnull.com</a></p>
+        <br/>
+      </div>
+  </div>
+   <div class="aside-widget  clearfix">
+      <header>
+          <h3>Github</h3>
+      </header>
+      <div class="body">
+        <a href='https://github.com/pipe-devnull'>github.com/pipe-devnull</a>
+        
+	<hr/>
+	<p class='lead'><a href="https://github.com/pipe-devnull/mink-behat-acceptance-test-demo">mink-behat-acceptance-test-demo</a></p>
+	<p class='small'>Example of using Behat, MInk & Mink Extension to build an acceptance (functional) test suite. (Forks: 0)</p>
+
+
+	<hr/>
+	<p class='lead'><a href="https://github.com/pipe-devnull/vagrant-dev-lamp">vagrant-dev-lamp</a></p>
+	<p class='small'>Base LAMP (PHP) stack with vagrant that includes remote debugging, profiling with xhprof and other common PHP QA tools. (Forks: 13)</p>
+
+
+	<hr/>
+	<p class='lead'><a href="https://github.com/pipe-devnull/ZF2Helper">ZF2Helper</a></p>
+	<p class='small'>Zend Framework 2 helper for Sublime Text 2 that helps automate the creation of new modules, controllers and actions. (Forks: 7)</p>
+
+
+      </div>
+  </div>
+   <div class="aside-widget">
+      <header>
+          <h3>Tags</h3>
+      </header>
+      <div class="body clearfix">
+          	<ul class='tags'>
+	
+		<li>
+			<a id="subversion" href="/tags/subversion.html">subversion</a>
+		</li>
+	
+		<li>
+			<a id="PHP" href="/tags/PHP.html">PHP</a>
+		</li>
+	
+		<li>
+			<a id="PHPUnit" href="/tags/PHPUnit.html">PHPUnit</a>
+		</li>
+	
+		<li>
+			<a id="ZendFramework" href="/tags/ZendFramework.html">ZendFramework</a>
+		</li>
+	
+		<li>
+			<a id="editors" href="/tags/editors.html">editors</a>
+		</li>
+	
+		<li>
+			<a id="SublimeText" href="/tags/SublimeText.html">SublimeText</a>
+		</li>
+	
+		<li>
+			<a id="Python" href="/tags/Python.html">Python</a>
+		</li>
+	
+		<li>
+			<a id="HTTP" href="/tags/HTTP.html">HTTP</a>
+		</li>
+	
+		<li>
+			<a id="git" href="/tags/git.html">git</a>
+		</li>
+	
+		<li>
+			<a id="Vagrant" href="/tags/Vagrant.html">Vagrant</a>
+		</li>
+	
+		<li>
+			<a id="Virtualbox" href="/tags/Virtualbox.html">Virtualbox</a>
+		</li>
+	
+		<li>
+			<a id="Puppet" href="/tags/Puppet.html">Puppet</a>
+		</li>
+	
+		<li>
+			<a id="BDD" href="/tags/BDD.html">BDD</a>
+		</li>
+	
+		<li>
+			<a id="Testing" href="/tags/Testing.html">Testing</a>
+		</li>
+	
+	</ul>
+
+      </div>
+  </div>
+</aside>
+            </div>
+        </div>
+    </div>
+
+        <footer>
+        <div class="widewrapper footer">
+            <div class="container">
+                <div class="row">
+                    <div class="col-md-4 footer-widget">
+                       <!--  <h3> <i class="icon-cog"></i>Statistics</h3>
+
+                        <span>Even we sometimes loose track of how many articles we actually have here.  This one helps:</span>
+
+                        <div class="stats">
+                            <div class="line">
+                                <span class="counter">27</span>
+                                <span class="caption">Articles</span>
+                            </div>
+                            <div class="line">
+                                <span class="counter">208</span>
+                                <span class="caption">Comments</span>
+                            </div>
+                            <div class="line">
+                                <span class="counter">2</span>
+                                <span class="caption">Authors</span>
+                            </div>                    
+                        </div> -->
+                    </div>
+
+                    <div class="col-md-4 footer-widget">
+                        <!-- <h3> <i class="icon-star"></i>Hall of Fame</h3>
+                        <ul class="tales-list">
+                            <li><a href="index.html">Why we Need to Encrypt All Communication</a></li>
+                            <li><a href="#">Selling is a Function of Design. Not Vice-Versa.</a></li>
+                            <li><a href="#">It’s Hard To Come Up With Dummy Titles</a></li>
+                            <li><a href="#">Why the Internet is Full of Cats</a></li>
+                            <li><a href="#">Last Made-Up Headline, I Swear!</a></li>
+                        </ul> -->
+                    </div>
+
+                    <div class="col-md-4 footer-widget">
+                        <h3> <i class="icon-cog"></i>Contact Me</h3>
+                        <span class="email">
+                            <a href="#">ade@pipe-devnull.com</a>,
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="widewrapper copyright">
+            <div class="container">
+                pipe-devnull.com &copy;  2013
+            </div>
+        </div>
+    </footer>
+
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+    <script>window.jQuery || document.write('<script src="/js/vendor/jquery/jquery-1.9.1.min.js"><\/script>')</script>    
+    <script src="/js/vendor/bootstrap/bootstrap.min.js"></script>
+    <script src="/js/vendor/modernizr/modernizr.js"></script>
+    <script src="/js/vendor/jquery.simplemodal.1.4.4.min.js"></script>
+    <script src="/js/null.js"></script>
+    <script type="text/javascript">
+
+      var _gaq = _gaq || [];
+      _gaq.push(['_setAccount', 'UA-34003533-1']);
+      _gaq.push(['_trackPageview']);
+
+      (function() {
+        var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+        ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+        var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+      })();
+
+    </script>
+
+</html>
